@@ -1,0 +1,200 @@
+##################################################################################
+# Benchmark our correlation results with the perturbation data set of Monique
+# * focus on UT cells and compare with CD4T cells (closest cell type)
+# * new version: Wilcoxon Test
+#################################################################################
+
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+library(RColorBrewer)
+library(gtools)
+
+theme_set(theme_bw())
+
+setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
+
+#Get colors
+cols_brewer <- brewer.pal(n = 3, "Set2")[2:3]
+
+p_vals<-NULL
+all_comps<-NULL
+for(data_type in c("ImmuNexUT","sc")){
+  
+  cond<-"UT"
+  
+  #corr_threshold<-0.1
+  MTcorrection<-"FDR" #alternatives: "Bonf","FDR"
+  
+  #print(paste("Chosen correlation threshold:",corr_threshold))
+  print(paste("MT correction:",MTcorrection))
+  
+  if(data_type == "sc"){
+    
+    ct<-"CD4T" #alternative "CD8T"
+    
+    corr_ct<-fread(paste0("co-expression_indivs_combined/",ct,"/",ct,"_",cond,
+                          "_correlation.csv"))
+    corr_ct$gene1<-gsub(";.*","",corr_ct$V1)
+    corr_ct$gene2<-gsub(".*;","",corr_ct$V1)
+    
+    corr_ct$swap<-ifelse(corr_ct$gene1 > corr_ct$gene2,corr_ct$gene1,corr_ct$gene2)
+    corr_ct$gene1<-ifelse(corr_ct$gene1 > corr_ct$gene2,corr_ct$gene2,corr_ct$gene1)
+    corr_ct$gene2<-corr_ct$swap
+    corr_ct$swap<-NULL
+  } else if (data_type == "ImmuNexUT"){
+    
+    ct<-"Naive_CD4"
+    
+    #Read ImmuNexUT data (already preprocessed correctly)
+    corr_ct<-fread(paste0("imd_paper_rna_data/correlation/",
+                            ct,"_correlation.txt"))
+    corr_ct$V1<-NULL
+    colnames(corr_ct)[3]<-"UT"
+  }
+  
+  expressed_genes<-union(corr_ct$gene1,corr_ct$gene2)
+  
+  # Load perturbation data
+  path<-"perturbation_dataset/perturbation_data/CD4T_GATE2019_MAST_DE/WT_KO/"
+  path_negControl <- "perturbation_dataset/perturbation_data/CD4T_GATE2019_MAST_DE/WT_NP/"
+  
+  #Get a list with all DE genes
+  files<-list.files(path)
+  
+  #Use the setting without artifical cells
+  files<-files[!startsWith(files,"artificialCells_")]
+  genes<-unique(sapply(files,function(fl) strsplit(fl,"\\.")[[1]][1]))
+  print(paste0("Unique genes:",length(genes)))
+  
+  genes<-genes[genes %in% expressed_genes]
+  print(paste0("Unique genes expressed in 50% of cells:",length(genes)))
+  
+  #Bonferroni cutoff corrected for the number of expressed genes
+  if(MTcorrection == "Bonf"){
+    cutoff<-0.05/length(expressed_genes)
+  } else {
+    cutoff<-0.05
+  }
+  
+  # Go over each gene
+  plot_list<-list()
+  for(gene in genes){
+    
+    corr_ct_ko<-corr_ct[corr_ct$gene1==gene,c("gene2","UT")]
+    colnames(corr_ct_ko)[1]<-"gene1"
+    corr_ct_ko<-rbind(corr_ct_ko,corr_ct[corr_ct$gene2==gene,c("gene1","UT")])
+    
+    #Use absolute correlation
+    corr_ct_ko$UT<-abs(corr_ct_ko$UT)
+    
+    #Get all knock_out genes
+    all_measured_ko_genes<-NULL
+    ko_genes_combined<-NULL
+    for(fl in files[startsWith(files,gene)]){
+      ko_genes<-read.table(paste0(path,fl))
+      all_measured_ko_genes<-union(all_measured_ko_genes,rownames(ko_genes))
+      
+      if(MTcorrection=="FDR"){
+        ko_genes<-ko_genes[rownames(ko_genes) %in% expressed_genes,]
+        ko_genes$p_val<-p.adjust(ko_genes$p_val,method="BH")
+      }
+      
+      #Filter for expressed genes and significant threshold
+      ko_genes<-ko_genes[rownames(ko_genes) %in% expressed_genes &
+                           ko_genes$p_val<cutoff,]
+      ko_genes_combined<-union(ko_genes_combined,rownames(ko_genes))
+    }
+    
+    print(gene)
+    # print(paste("Measured genes:",length(all_measured_ko_genes)))
+    # print(paste("Number associated genes:",length(ko_genes_combined)))
+    # 
+    genes_found_in_both<-intersect(all_measured_ko_genes,expressed_genes)
+    print(paste("Number genes measured in both:",length(genes_found_in_both)))
+    
+    #Remove false positive DE genes
+    for(fl in list.files(path_negControl,pattern=gene)){
+      fp_genes<-read.table(paste0(path_negControl,fl))
+      
+      if(MTcorrection=="FDR"){
+        fp_genes<-ko_genes[rownames(fp_genes) %in% expressed_genes,]
+        fp_genes$p_val<-p.adjust(fp_genes$p_val,method="BH")
+      }
+      
+      fp_genes<-fp_genes[fp_genes$p_val<cutoff,]
+      ko_genes_combined<-setdiff(ko_genes_combined,rownames(fp_genes))
+    }
+    
+    corr_ct_ko<-corr_ct_ko[corr_ct_ko$gene1 %in% genes_found_in_both,]
+    corr_ct_ko$is_ko<-corr_ct_ko$gene1 %in% ko_genes_combined
+    
+    corr_ct_ko$ko_gene<-gene
+    corr_ct_ko$data_type<-data_type
+    
+    all_comps<-rbind(all_comps,corr_ct_ko)
+    
+    wt<-wilcox.test(corr_ct_ko$UT[corr_ct_ko$is_ko],corr_ct_ko$UT[!corr_ct_ko$is_ko],
+                    paired=FALSE,alternative="greater")
+    
+    p_vals<-rbind(p_vals,data.frame(ko_gene=gene,data_type,pval=wt$p.value))
+  }
+}
+
+all_comps$data_type<-ifelse(all_comps$data_type=="sc","single cell",
+                            "ImmuNexUT")
+all_comps$data_type<-factor(all_comps$data_type,
+                            levels=c("single cell","ImmuNexUT"))
+
+p_vals$data_type<-ifelse(p_vals$data_type=="sc","single cell",
+                            "ImmuNexUT")
+p_vals$text<-stars.pval(p_vals$pval)
+p_vals$text[p_vals$text=="."]<-"+"
+p_vals$UT<-0.65
+
+g<-ggplot()+
+  geom_boxplot(data=all_comps,aes(x=data_type,y=UT,fill=is_ko))+
+  geom_text(data=p_vals,aes(x=data_type,y=UT,label=text))+
+  facet_wrap(~ko_gene,nrow=1)+
+  xlab("Data set")+
+  ylab("Absolute correlation")+
+  scale_fill_manual("DE gene\nafter KO",values=cols_brewer)
+
+ggsave(g,file="perturbation_dataset/plots/wilcoxon_all_combined.pdf",
+       width=15,height=4)
+                          
+# #Save merged plot
+# g_comp<-ggarrange(plotlist=plot_list,ncol=5,nrow=1)
+# 
+# if(data_type == "sc"){
+#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_allgenes_",
+#                             MTcorrection,".pdf"),
+#          width=15,height=4)
+#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_allgenes_",
+#                             MTcorrection,".png"),
+#                               width=15,height=4)
+# } else if (data_type == "ImmuNexUT"){
+#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_ImmuNexUT_allgenes_",
+#                             MTcorrection,".pdf"),
+#          width=15,height=4)
+#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_ImmuNexUT_allgenes_",
+#                             MTcorrection,".png"),
+#          width=15,height=4)
+# }
+
+# #Check how similar the knockout of different guide RNAs is
+# #gene<-"FOXP1"
+# gene<-"PHB2"
+# test_files<-files[startsWith(files,gene)]
+# res_1<-read.table(paste0(path,test_files[1]))
+# res_2<-read.table(paste0(path,test_files[2]))
+# res_1$gene<-rownames(res_1)
+# res_2$gene<-rownames(res_2)
+# res<-merge(res_1,res_2,by="gene")
+# g<-ggplot(res,aes(-log10(p_val.x),-log10(p_val.y)))+
+#   geom_point()+ggtitle(gene)
+# ggsave(g,file=paste0("perturbation_dataset/plots/compare_guideRNA_",gene,"_pval.png"))
+# 
+# g<-ggplot(res,aes(avg_logFC.x,avg_logFC.y))+
+#   geom_point()+ggtitle(paste0(gene," - corr=",round(cor(res$avg_logFC.x,res$avg_logFC.y),2)))
+# ggsave(g,file=paste0("perturbation_dataset/plots/compare_guideRNA_",gene,"_fc.png"))
