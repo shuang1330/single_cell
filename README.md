@@ -33,3 +33,15 @@ All scripts are saved in `04_network_reconstruction`:
 *  `ct_networks_threshold.R` : find optimal correlation cutoff for single cell data by looking at MCC with bulk data (supplementary figure)
 * `evaluate_large_networks_compare_edges.R`: compare overlap between edges between cell types and condtions (Figure 4b)
 *  `evaluate_large_networks`: evaluate degree distribution (supplementary figure) as well as louvain clusters plus GO term enrichment (Figure 4c) for each network
+
+
+## Co-Expression QTL Mapping
+
+All scripts are saved in `05_coeqtl_mapping`:
+
+*  `launch_sbatch_files.sh`: pipeline for each step in the coeQTL mapping process
+*  `individual_networks.py` : calculate individual networks (zscores) for given dataset, stimulation condition and celltype
+*  `merge_coexpression_for_betaeqtl.py` : merge the individual networks from different datasets used for meta analysis for given stimulation condition and celltype
+*  `prepare_genelist_and_annotation_for_betaqtl.py`: prepare the input files for coeqtl mapping software
+*  `evaluate_large_networks`: evaluate degree distribution (supplementary figure) as well as louvain clusters plus GO term enrichment (Figure 4c) for each network
+
