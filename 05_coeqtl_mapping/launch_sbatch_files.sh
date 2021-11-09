@@ -35,3 +35,14 @@ cd ${working_dir}/output/${condition}_${celltype} ||exit
 ./suball.sh ${working_dir}/output/${condition}_${celltype}/duplicatedversion1/jobs
 ./suball.sh ${working_dir}/output/${condition}_${celltype}/duplicatedversion2/jobs
 done
+
+# concate and process output from betaqtl
+for celltype in 'CD4T' 'CD8T' 'B' 'NK' 'DC'
+do
+  cd ${working_dir}/output/${condition}_${celltype} ||exit
+  echo ${condition}_${celltype}
+  sbatch --parsable --job-name process_betaqtl_results_${condition}_${celltype} \
+  --output ${working_dir}/input/individual_networks/logs/process_betaqtl_results_${condition}_${celltype}.out \
+  --error ${working_dir}/input/individual_networks/logs/process_betaqtl_results_${condition}_${celltype}.err \
+  ${working_dir}/output/submit_process_betaqtl_results.sh ${condition} ${celltype}
+done
