@@ -43,5 +43,8 @@ All scripts are saved in `05_coeqtl_mapping`:
 *  `individual_networks.py` : calculate individual networks (zscores) for given dataset, stimulation condition and celltype
 *  `merge_coexpression_for_betaeqtl.py` : merge the individual networks from different datasets used for meta analysis for given stimulation condition and celltype
 *  `prepare_genelist_and_annotation_for_betaqtl.py`: prepare the input files for coeqtl mapping software
-*  `evaluate_large_networks`: evaluate degree distribution (supplementary figure) as well as louvain clusters plus GO term enrichment (Figure 4c) for each network
+*  `concat_betaqtl_results.py`: merge all output files from the mapping software
+*  `screen_permutation_p_values.py`: merge all permutation p values for multiple testing purpose
+*  `multipletesting_correction.py`: perform multiple testing correction procedures
+*  `annotate_betaqtl_results.py`: merge the coeQTLs results with other information such as non-zero ratio and mean and variances of the co-expression patterns
 
