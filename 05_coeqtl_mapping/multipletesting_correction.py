@@ -5,7 +5,6 @@ import argparse
 from scipy.optimize import minimize
 from scipy.stats import beta
 from scipy import special
-from pathlib import Path
 
 
 def read_numpy(prefix):
@@ -54,24 +53,14 @@ def arguments():
 
 
 def main():
-    # workdir = Path("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/")
-    # # fit beta distribution per each eQTL
-    # permutation_pvalue_prefix = workdir/'output/UT_monocytes/concated_alltests_permutations'
     args = arguments().parse_args()
     permutation_pvalue_prefix = args.permutation_pvalue_prefix
     permutation_pvalues_df = read_numpy(permutation_pvalue_prefix)
     permutation_cols = [f'perm{ind}' for ind in range(0, 100)]
     permutation_pvalues_df['beta_shape1'], permutation_pvalues_df['beta_shape2'] = \
     zip(*[fit_beta_distribution(x)[0] for x in permutation_pvalues_df[permutation_cols].values])
-    # for snp_gene in permutation_pvalues_df.index:
-    #     perms_p = permutation_pvalues_df[permutation_cols].loc[snp_gene]
-    #     print(snp_gene)
-    #     _ = beta.fit(perms_p)[:2]
-    # load the merged results and find the lowest nominalP per each eQTL
-    # coeqtl_path = workdir/"output/UT_monocytes/concated_alltests_output.tsv"
     coeqtl_path = args.coeqtl_path
     # first find the eqtl gene
-    # eqtls_path = workdir/'input/snp_selection/eqtl/UT_monocyte_eQTLProbesFDR0.05-ProbeLevel.tsv'
     eqtls_path = args.eqtl_path
     eqtl_dic = pd.read_csv(eqtls_path, sep='\t').set_index('SNPName')['ProbeName'].T.to_dict()
     coeqtls = pd.read_csv(coeqtl_path, sep='\t', index_col=0)
@@ -96,17 +85,10 @@ def main():
                                                permutation_pvalues_df[['nominalP', 'scipy_beta_shape1', 'scipy_beta_shape2']].values]
     # over all eqtls, perform BH-FDR
     permutation_pvalues_df['qval'] = multipletests(permutation_pvalues_df['pval_beta'].values, method='fdr_bh')[1]
-    # # determine global min(p) significance threshold and calculate nominal p-value threshold for each gene
-    # ub <- sort(fastqtl.df[fastqtl.df$qval > args$fdr, 'pval_beta'])[1]  # smallest p-value above FDR
     ub = permutation_pvalues_df[permutation_pvalues_df['qval']>=0.05].sort_values(by=['pval_beta'], ascending=True)['pval_beta'].values[0]
-    # lb <- -sort(-fastqtl.df[fastqtl.df$qval <= args$fdr, 'pval_beta'])[1]  # largest p-value below FDR
     lb = permutation_pvalues_df[permutation_pvalues_df['qval']<=0.05].sort_values(by=['pval_beta'], ascending=False)['pval_beta'].values[0]
-    # pthreshold <- (lb+ub)/2
     pthreshold = (ub + lb) / 2
-    # cat("  * min p-value threshold @ FDR ", args$fdr, ": ", pthreshold, "\n", sep="")
     print('Minimum p-value threshold', pthreshold)
-    # fastqtl.df[, 'pval_nominal_threshold'] <- signif(qbeta(pthreshold,
-    #     fastqtl.df[, 'beta_shape1'], fastqtl.df[, 'beta_shape2'], ncp=0, lower.tail=TRUE, log.p=FALSE), 6)
     permutation_pvalues_df['threshold_per_betadistribution'] = [beta.ppf(pthreshold, x[0], x[1]) for x in
                                                                 permutation_pvalues_df[['beta_shape1',
                                                                                         'beta_shape2']].values]
@@ -120,7 +102,6 @@ def main():
     issig = lambda x:True if x[0] <= x[1] else False
     coeqtls['gene2_isSig'] = [issig(item) for item in coeqtls[['MetaP', 'gene2_pthreshold']].values]
     significant_coeqtls = coeqtls[(coeqtls['snp_qval']<=0.05) & (coeqtls['gene2_isSig'])]
-    # savepath = workdir/'output/UT_monocytes/concated_alltests_output.withP.tsv'
     saveprefix = args.saveprefix
     coeqtls.to_csv(f'{saveprefix}.all.tsv.gz', sep='\t', compression='gzip')
     significant_coeqtls.to_csv(f'{saveprefix}.sig.tsv.gz', sep='\t', compression='gzip')
