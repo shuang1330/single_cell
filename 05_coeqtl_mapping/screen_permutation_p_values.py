@@ -9,10 +9,21 @@ import gzip
 
 
 def update_perm(old_p_list, new_p_list):
-    return [np.min([x, y]) for (x, y) in zip(old_p_list, new_p_list)]
+    return np.min([old_p_list, new_p_list], axis=0)
+    # return [np.min([x, y]) for (x, y) in zip(old_p_list, new_p_list)]
 
 
-def loop_through_one_batch_perm(batch_perm_path, snpgene1_minpvalues_dict, eqtl_dict):
+def find_eqtlsnp_gene(snp, genepair, eqtl_genedic):
+    gene1, gene2 = genepair.split(';')
+    snp1, snp2 = eqtl_genedic.get(gene1), eqtl_genedic.get(gene2)
+    if snp1 == snp:
+        return '_'.join([snp, gene1])
+    else:
+        return '_'.join([snp, gene2])
+
+
+
+def loop_through_one_batch_perm(batch_perm_path, snpgene1_minpvalues_dict, eqtl_genedic):
     with gzip.open(batch_perm_path, 'rb') as f:
         f.readline()
         while True:
@@ -22,7 +33,7 @@ def loop_through_one_batch_perm(batch_perm_path, snpgene1_minpvalues_dict, eqtl_
             else:
                 linecontent = line.strip().split('\t')
                 perm_ps = [float(ele) for ele in linecontent[2:]]
-                snp_gene1 = '_'.join([linecontent[1], eqtl_dict.get(linecontent[1])])
+                snp_gene1 = find_eqtlsnp_gene(linecontent[1], linecontent[0], eqtl_genedic)
                 snpgene1_minpvalues_dict[snp_gene1] = update_perm(snpgene1_minpvalues_dict[snp_gene1],
                                                                   perm_ps)
     return snpgene1_minpvalues_dict
@@ -68,8 +79,8 @@ def main():
     # load eqtl path
     eqtl_df = pd.read_csv(eqtl_path, sep='\t')
     eqtl_df['snp_gene1'] = ['_'.join(item) for item in eqtl_df[['SNPName', 'genename']].values]
-    unique_snpgene1 = eqtl_df['snp_gene1'].valuese
-    eqtl_dict = eqtl_df.set_index('SNPName')['genename'].T.to_dict()
+    unique_snpgene1 = eqtl_df['snp_gene1'].values
+    eqtl_dict = eqtl_df.set_index('genename')['SNPName'].T.to_dict()
     # initialize the dict to contain the
     snpgene1_minpvalues_dict = {item: np.ones(100) for item in unique_snpgene1}
     # loop through all batch permutation files
@@ -87,7 +98,8 @@ def main():
             snpgene1_minpvalues_dict = loop_through_one_batch_perm(results_path / 'duplicatedversion2/output'/filename,
                                                                    snpgene1_minpvalues_dict, eqtl_dict)
     snpgene1_minpvalues_df = pd.DataFrame.from_dict(snpgene1_minpvalues_dict)
-    save_numpy(snpgene1_minpvalues_df.T, workdir/f'output/{condition}_{celltype}/concated_alltests_permutations')
+    snpgene1_minpvalues_df.T.to_csv(workdir/f'output/{condition}_{celltype}/concated_alltests_permutations.tsv.gz',
+                                    sep='\t', compression='gzip')
     return snpgene1_minpvalues_df
 
 
