@@ -18,18 +18,18 @@ celltype=$2
 workdir="/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping"
 python ${workdir}/output/concat_betaqtl_results.py \
 --prefix ${workdir}/output/${condition}_${celltype} \
---savepath ${workdir}/output/${condition}_${celltype}/concated_alltests_output.tsv
+--savepath ${workdir}/output/${condition}_${celltype}/concated_alltests_output.tsv.gz
 
 python ${workdir}/output/screen_permutation_p_values.py \
 --condition ${condition} \
 --celltype ${celltype}
 
 python ${workdir}/output/multipletesting_correction.py \
---permutation_prefix ${workdir}/output/${condition}_${celltype}/concated_alltests_permutations \
---coeqtl_path ${workdir}/output/${condition}_${celltype}/concated_alltests_output.tsv \
+--permutation_pvalue_path ${workdir}/output/${condition}_${celltype}/concated_alltests_permutations.tsv.gz \
+--coeqtl_path ${workdir}/output/${condition}_${celltype}/concated_alltests_output.tsv.gz \
 --eqtl_path ${workdir}/input/snp_selection/eqtl/${condition}_${celltype}_eQTLProbesFDR0.05-ProbeLevel.tsv \
 --save_prefix ${workdir}/output/${condition}_${celltype}/coeqtls_fullresults
 
 python ${workdir}/output/annotate_betaqtl_results.py \
---coeqtl ${workdir}/output/${condition}_${celltype}/coeqtls_fullresults.tsv.gz \
+--coeqtl ${workdir}/output/${condition}_${celltype}/coeqtls_fullresults.all.tsv.gz \
 --saveprefix ${workdir}/output/${condition}_${celltype}/coeqtls_fullresults
