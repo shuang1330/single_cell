@@ -138,7 +138,7 @@ for chr in genesPerChr.keys():
 	print("Writing job: "+template+"\n"+batchfile+"\n"+jobfile+"\n"+outprefix+"\n"+str(chr))
 	# exp, gte, gt, template, batchfile, jobfile, outprefix, chr
 	chrgenotype = genotype.replace("CHR",str(chr))
-	writeJob(expfile, gte, chrgenotype, template, batchfile, jobfile, outprefix, logprefix, chr)
+	writeJob(expfile, gte, chrgenotype, template, batchfile, jobfile, outprefix, logprefix, chr, condition, celltype)
 	bgout = open(batchfile,'w')
 	while gctr < len(chrgenes):
 		bgout.write(chrgenes[gctr]+"\n")
@@ -155,7 +155,7 @@ for chr in genesPerChr.keys():
 			outprefix = abspath+"/output/"+batchname
 			logprefix = abspath+"/logs/"+batchname
 #			writeJob(template, batchfile, jobfile, outprefix, chr)
-			writeJob(expfile, gte, chrgenotype, template, batchfile, jobfile, outprefix, logprefix, chr)
+			writeJob(expfile, gte, chrgenotype, template, batchfile, jobfile, outprefix, logprefix, chr, condition, celltype)
 
 			bgout = open(batchfile,'w')
 			bgctr = 0
