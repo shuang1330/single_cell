@@ -8,7 +8,7 @@ batchsize=100000
 
 genelist=${workdir}/"output/${condition}_${celltype}/genelist.noduplicated.txt"
 geneannotation=${workdir}/"input/summary/${condition}_${celltype}.genepairs.annotation.gene1position.noduplicated.tsv"
-jobtemplatefile=${workdir}/"output/${condition}_${celltype}/jobtemplate.noduplicated.sh"
+jobtemplatefile=${workdir}/"output/betaqtl_scripts/jobtemplate.noduplicated.sh"
 outputfile=${workdir}/"output/${condition}_${celltype}/noduplicated/"
 mkdir -p ${outputfile}
 python createBatches.py \
@@ -25,7 +25,7 @@ python createBatches.py \
 
 genelist=${workdir}/"output/${condition}_${celltype}/genelist.duplicatedversion1.txt"
 geneannotation=${workdir}/"input/summary/${condition}_${celltype}.genepairs.annotation.gene1position.duplicatedversion1.tsv"
-jobtemplatefile=${workdir}/"output/${condition}_${celltype}/jobtemplate.duplicatedversion1.sh"
+jobtemplatefile=${workdir}/"output/betaqtl_scripts/jobtemplate.duplicatedversion1.sh"
 outputfile=${workdir}/"output/${condition}_${celltype}/duplicatedversion1/"
 mkdir -p ${outputfile}
 python createBatches.py \
@@ -42,7 +42,7 @@ python createBatches.py \
 
 genelist=${workdir}/"output/${condition}_${celltype}/genelist.duplicatedversion2.txt"
 geneannotation=${workdir}/"input/summary/${condition}_${celltype}.genepairs.annotation.gene1position.duplicatedversion2.tsv"
-jobtemplatefile=${workdir}/"output/${condition}_${celltype}/jobtemplate.duplicatedversion2.sh"
+jobtemplatefile=${workdir}/"output/betaqtl_scripts/jobtemplate.duplicatedversion2.sh"
 outputfile=${workdir}/"output/${condition}_${celltype}/duplicatedversion2"
 mkdir -p ${outputfile}
 python createBatches.py \
