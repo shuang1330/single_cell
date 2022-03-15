@@ -1,0 +1,15 @@
+name: r_env
+channels:
+  - anaconda
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.0.2
+  - r-data.table
+  - r-dplyr
+  - r-ggplot2
+  - r-ggpubr
+  - r-rcolorbrewer
+  - r-seurat
+  - r-viridis

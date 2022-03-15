@@ -1,50 +1,44 @@
-# Single cell network generation
+# Single cell co-expression QTL analysis
 
-## General instructions (for Gearshift)
+This repository contains the code to generate the results and figures from
 
-All required packages are installed in two different conda environments, one for R scritps called `r40` and one for python scripts called `velocyto`
+**Identification of genetic variants that impact gene co-expression relationships using large-scale single-cell data**
 
-To activate the conda environment on gearshift:
+Shuang Li *, Katharina T. Schmid *, Dylan de Vries *, Maryna Korshevniuk , Roy Oelen, Irene van Blokland, Hilde E. Groot, Morris Swertz, Pim van der Harst, Harm-Jan Westra, Monique van der Wijst, Matthias Heinig **, Lude Franke **
+
+<add reference to publication here when available>
+
+## Overview
+
+The code for the analysis is separated in different steps, each in its own subdirectory including a README file:
+* Exploring different different association metrics and other GRN construction tools, including pseudotemporal based ones and combing cells to meta cells [01_association_metrics/](01_association_metrics/)
+* Comparing correlation between the different single cell data sets, with bulk data and CRISPR knock-out data; testing potential occurence of Simpson's paradox [02_correlation_evaluation/](02_correlation_evaluation/)
+* Comparing correlation between different cell types and between different individuals within one cell type [03_celltype_individual_comparison/](03_celltype_individual_comparison/)
+* Running eQTL and coeQTL mapping pipelines followed by replication in bulk and technical evaluation of the co-eQTLs, such as correlation distribution, sub cell type effects and effects of subsampling cells or donors [04_coeqtl_mapping/](04_coeqtl_mapping/)
+* Interpretation of co-eQTL results with GWAS annotation, GO enrichment, ... [05_coeqtl_interpretation/](05_coeqtl_interpretation/)
+
+## Software requirements
+
+Most code is implemented in R or python, the required packages are documented in the respective yaml files (`conda_env_R.yml` and `conda_env_python.yml`) and can be used to setup the respective [conda environments](https://docs.conda.io/en/latest/):
 
 ```
-source /groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/tools/miniconda3/etc/profile.d/conda.sh
-conda activate r40
+conda env create -f conda_env_R.yml
+conda activate r_env
 ```
 
-All scripts have relative pathes, dependent on the route directory `/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing`. For this reason, the working directory is set in the beginning of all scripts (both R and python) to this directory.
+The following R packages are not part of conda and need to be added afterwards (if the respective code part should be run):
 
-Warning: because some of the scripts were implemented for Calculon, it might happen that the working directory is wrong (`tmp04` instead of `tmp01`) or that a package is missing on conda.
+```
+if (!require("BiocManager")) install.packages('BiocManager') 
+BiocManager::install("tanaylab/metacell")
+```
 
-## Evaluation of correlation metrics (Figure 2)
+Further external tools were used:
 
-All scripts are saved in `02_correlation_evaluation`:
-*  `compare_blueprint_cutoffs.py`: compare correlation between Blueprint and single cell for different expression cutoffs (expressed in x% of the cells); currently only implemented only for Blueprint monocytes and single cell 1 Mio cell v3 (Figure 2a)
-*  `figure2_barplot_cutoffs.R`: plotting script for Figure 2a
-*  `correlation_timepoint_combined_indivs.py`: calculate correlation per timepoint and cell type for 1 Mio cell data set version 2 and 3, using either a specified expression cutoff or a predefined gene set
-*  `figure2_scatterplots.R`: plotting script arranging all the different scatter plots (Figure 2c,d and supplementary figures)
-*  `perturbation_wilcoxon.R`: calculate enrichment of correlated genes among KO DE genes usign the Wilcoxon rank sum text (Figure 2e)
-
-## Network construction (Figure 4)
-
-All scripts are saved in `04_network_reconstruction`:
-
-*  `expressed_genes_overlap.R`: evaluate number of expressed genes for each cell type and condition (expressed in 50% of the cells) plus the intersect between them (supplementary figure)
-*  `correlation_distribution_cts.R` : check correlation values for each cell type and condition (Figure 4a)
-*  `ct_networks_threshold.R` : find optimal correlation cutoff for single cell data by looking at MCC with bulk data (supplementary figure)
-* `evaluate_large_networks_compare_edges.R`: compare overlap between edges between cell types and condtions (Figure 4b)
-*  `evaluate_large_networks`: evaluate degree distribution (supplementary figure) as well as louvain clusters plus GO term enrichment (Figure 4c) for each network
+* To calculate the eQTLs ...
+* To calculate the co-eQTLs ...
 
 
-## Co-Expression QTL Mapping
 
-All scripts are saved in `05_coeqtl_mapping`:
 
-*  `launch_sbatch_files.sh`: pipeline for each step in the coeQTL mapping process
-*  `individual_networks.py` : calculate individual networks (zscores) for given dataset, stimulation condition and celltype
-*  `merge_coexpression_for_betaeqtl.py` : merge the individual networks from different datasets used for meta analysis for given stimulation condition and celltype
-*  `prepare_genelist_and_annotation_for_betaqtl.py`: prepare the input files for coeqtl mapping software
-*  `concat_betaqtl_results.py`: merge all output files from the mapping software
-*  `screen_permutation_p_values.py`: merge all permutation p values for multiple testing purpose
-*  `multipletesting_correction.py`: perform multiple testing correction procedures
-*  `annotate_betaqtl_results.py`: merge the coeQTLs results with other information such as non-zero ratio and mean and variances of the co-expression patterns
 
