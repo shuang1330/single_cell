@@ -7,8 +7,10 @@ dependencies:
   - matplotlib=3.2.1
   - numpy=1.18.4
   - pandas=1.0.3
+  - pathlib
   - python=3.6.10
   - scipy=1.4.1
+  - time
   - tqdm=4.46.0
   - pip:
     - anndata==0.7.3
