@@ -36,7 +36,7 @@ BiocManager::install("tanaylab/metacell")
 Further external tools were used:
 
 * To calculate the eQTLs ...
-* To calculate the co-eQTLs ...
+* To calculate the co-eQTLs: [betaQTL](https://github.com/molgenis/systemsgenetics/tree/master/BetaQTL)
 
 
 
