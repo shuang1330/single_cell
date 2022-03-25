@@ -4,6 +4,7 @@
 # ------------------------------------------------------------------------------
 
 library(data.table)
+library(dplyr)
 library(ggplot2)
 library(ggpubr)
 
@@ -21,7 +22,7 @@ cell_types_corrected<-setNames(c("CD4+ T","CD8+ T","Monocyte","NK","DC","B"),
 
 g_list<-NULL
 for(dataset in c("onemillionv2","onemillionv3")){
-  summary<-NULL
+  corr_summary<-NULL
   for(ct in cell_types){
     
     #Correlation values
@@ -31,21 +32,32 @@ for(dataset in c("onemillionv2","onemillionv3")){
       corr<-fread(paste0(path,dataset,"/UT_",ct,".genesnonzero0.5.zscores.gz"))
     }
     
-    #Get mean and variance for each gene pair
+    #Get mean and variance for each gene pair (drop NA and Inf values from calculation)
     gene_pairs<-corr$V1
     corr$V1<-NULL
     
-    summary<-rbind(summary,
+    #Set Inf values to NA to remove them afterwards
+    corr<-as.matrix(corr)
+    corr[is.infinite(corr)]<-NA
+    corr_summary<-rbind(corr_summary,
                    data.frame(ct,
                               gene_pairs,
-                              var=apply(corr,1,var),
-                              mean=apply(corr,1,mean)))
+                              var=apply(corr,1,var,na.rm=TRUE),
+                              mean=apply(corr,1,mean,na.rm=TRUE)))
   }
   
-  #Replace cell type names
-  summary$ct<-cell_types_corrected[summary$ct]
+  #Check frequency of "highly variable" genes
+  print(paste("Frequency of highly variable genes for",dataset))
+  tmp<-corr_summary%>%
+    group_by(ct)%>%
+    summarise(freq_high_var=mean(var>2,na.rm=TRUE))
+  print(tmp)
+  print(median(tmp$freq_high_var))
   
-  g<-ggplot(summary,aes(x=var,color=ct))+
+  #Replace cell type names
+  corr_summary$ct<-cell_types_corrected[corr_summary$ct]
+  
+  g<-ggplot(corr_summary,aes(x=var,color=ct))+
     geom_density()+
     xlab("Correlation variance across individuals")+
     ylab("Density")+

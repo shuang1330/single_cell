@@ -68,6 +68,13 @@ for(dataset in c("onemillionv2","onemillionv3")){
                                 ct,tp))
   }
   
+  #Check general distribution of "highly correlated genes"
+  high_corr<-all_corrs[all_corrs$level %in% c(">0.3",">0.2",">0.1"),]
+  high_corr<-high_corr%>%group_by(ct)%>%
+    summarize(high_freq=sum(freq))%>%
+    as.data.frame()
+  median(high_corr$high_freq)  
+  
   #Get comparison between cell types
   summary<-NULL
   for(ct in cell_types){

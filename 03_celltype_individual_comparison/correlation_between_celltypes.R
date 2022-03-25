@@ -104,4 +104,8 @@ for(version in c("v2","v3")){
           legend.text = element_text(size=12))
   ggsave(g,file=paste0("co-expression_indivs_combined/plots/corr_celltypes_",version,".pdf"),
          width=7,height=5)
+  
+  #Check correlation distribution across cell types
+  summary(corr_comp$corr[corr_comp$c1 != corr_comp$c2])
+  
 }
