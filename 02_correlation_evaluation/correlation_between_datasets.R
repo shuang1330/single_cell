@@ -394,9 +394,11 @@ g.3<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
   scale_color_manual(values=c("black","white"))+
   xlab("Bulk data set")+
   ylab("Bulk data set")+
-  scale_fill_viridis("Correlation",limits=c(0,1))
+  scale_fill_viridis("Correlation",limits=c(0,1))+
+  coord_flip()
   # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
   #       legend.position="none")
+  
 
 g_empty<-ggplot()+theme_void()
 g<-ggarrange(g.1,g.2,g_empty,g.3,ncol=2,nrow=2,widths=c(4,3),heights=c(4,3),
