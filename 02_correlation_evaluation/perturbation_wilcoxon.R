@@ -22,7 +22,7 @@ theme_set(theme_bw())
 setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
 
 #Get colors
-cols_brewer <- brewer.pal(n = 3, "Set2")[2:3]
+cols_brewer <- c(brewer.pal(n = 3, "Set2")[2],"grey78")
 
 #Set MT correction for KO gene identification
 MTcorrection<-"FDR" #alternatives: "Bonf","FDR"
@@ -183,8 +183,11 @@ p_vals$is_ko<-1.5
 #p_vals$is_ko<-factor(p_vals$is_ko,levels=c("TRUE","FALSE"))
 
 g_sc<-ggplot()+
-  geom_boxplot(data=all_comps[all_comps$data_type=="single cell",],
+  geom_violin(data=all_comps[all_comps$data_type=="single cell",],
                aes(x=is_ko,y=UT,fill=is_ko))+
+  geom_boxplot(data=all_comps[all_comps$data_type=="single cell",],
+               aes(x=is_ko,y=UT,fill=is_ko),
+               width = 0.15, outlier.shape = NA)+
   geom_text(data=p_vals[p_vals$data_type=="single cell",],
             aes(x=is_ko,y=max_UT,label=pvaltext),
             size=6)+
@@ -198,8 +201,11 @@ g_sc<-ggplot()+
         strip.text=element_text(size=15))
 
 g_bulk<-ggplot()+
-  geom_boxplot(data=all_comps[all_comps$data_type=="ImmuNexUT",],
+  geom_violin(data=all_comps[all_comps$data_type=="ImmuNexUT",],
                aes(x=is_ko,y=UT,fill=is_ko))+
+  geom_boxplot(data=all_comps[all_comps$data_type=="ImmuNexUT",],
+               aes(x=is_ko,y=UT,fill=is_ko),
+               width = 0.15, outlier.shape = NA)+
   geom_text(data=p_vals[p_vals$data_type=="ImmuNexUT",],
             aes(x=is_ko,y=max_UT,label=pvaltext),
             size=6)+

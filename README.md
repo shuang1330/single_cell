@@ -35,8 +35,8 @@ BiocManager::install("tanaylab/metacell")
 
 Further external tools were used:
 
-* To calculate the eQTLs ...
-* To calculate the co-eQTLs: [betaQTL](https://github.com/molgenis/systemsgenetics/tree/master/BetaQTL)
+* To calculate the eQTLs See the documentation [here](https://github.com/molgenis/systemsgenetics/wiki/eQTL-mapping-analysis-cookbook-for-RNA-seq-data).
+* To calculate the co-eQTLs: [betaQTL](https://github.com/molgenis/systemsgenetics/tree/master/BetaQTL).
 
 
 
