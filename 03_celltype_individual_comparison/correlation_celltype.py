@@ -1,7 +1,10 @@
-######################################################################
-# Calculate correlation for each cell type and the UT timepoint
-# merging all individuals
-######################################################################
+#############################################################################################
+# Calculate correlation for each pairwise gene combiation in each cell type and the UT timepoint,
+# where both genes are expressed in at least 50% of the cells
+# merging all individuals for Oelen v2 and v3 dataset (specified in parameter version2)
+# Input: seurat objects with Oelen v2 and v3 dataset
+# Output: correlation values as csv files (one per cell type)
+############################################################################################
 
 #from scipy.stats import t, norm
 from scipy.stats import spearmanr
@@ -13,11 +16,8 @@ from time import time
 import os
 import re
 
-# specify if the gene selection was done before and is passed in a file
+# specify if Oelen v2 (version2=True) or v3 (version2=False) dataset is used
 version2 = True
-
-# set working directory (to shorten path length)
-os.chdir('/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing')
 
 # set result path
 if version2:
@@ -51,6 +51,7 @@ observations['time_merged'] = [get_time(item) for item in observations['timepoin
 observations['timepoint_id_celltype'] = [f'{item[0]}_{item[1]}' for item
                                            in observations[['time_merged', 'cell_type_lowerres']].values]
 
+# iterate over each cell type
 celltypes = ['B', 'CD4T', 'CD8T', 'monocyte', 'DC', 'NK']
 for celltype in celltypes:
     if not os.path.isdir(prefix_results/celltype):
@@ -65,12 +66,13 @@ for celltype in celltypes:
     # get the set of gene pairs
     specific_obs = observations[observations['cell_type_lowerres']==celltype]
 
+    # select only UT cells
     for condition in ['UT']:
 
         # filter for the condition
         celltype_condition_data = celltype_data[specific_obs.time_merged==condition]
         
-        #filter genes after a nonzero rate
+        #filter genes after a nonzero rate of at least 0.5
         selected_genes = select_gene_nonzeroratio(celltype_condition_data, 0.5)
 
         print(f"Number of selected genes for {celltype} {condition}: {len(selected_genes)}")

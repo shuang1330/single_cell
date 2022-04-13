@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
-# Check Pearson correlation between cell types
-# Correlation matrices generated with correlation_timepoint_combined_indivs.py
-# Checking only UT cells and genes expressed in at least one cell type
+# Check Pearson correlation between cell types for Oelen v2 and v3 dataset
+# Input: correlation matrices generated with correlation_timepoint_combined_indivs.py
+# Output: heatmap plot and summary as output text
 #  -----------------------------------------------------------------------------
 
 library(data.table)
@@ -10,15 +10,13 @@ library(viridis)
 
 theme_set(theme_bw())
 
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
-
 cell_types<-c("CD4T","CD8T","monocyte","NK","DC","B")
 
 #Full cell type names as reported in the paper
 cell_types_corrected<-setNames(c("CD4+ T","CD8+ T","Monocyte","NK","DC","B"),
                                c("CD4T","CD8T","monocyte","NK","DC","B"))
 
-#Check for both v3 and v2 chemistry
+#Check for both Oelen v3 and v2 datasets (paths set dependent on that)
 path_v3<-"co-expression_indivs_combined/"
 path_v2<-"co-expression_indivs_combined/one_million_version2/"
 
@@ -30,6 +28,7 @@ for(version in c("v2","v3")){
     path<-path_v3
   }
   
+  #Iterate over each cell type combination to do all pairwise comparisons
   corr_comp<-NULL
   for(c1 in 1:c(length(cell_types)-1)){
     

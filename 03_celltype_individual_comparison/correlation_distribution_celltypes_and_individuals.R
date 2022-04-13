@@ -2,6 +2,13 @@
 # Check Pearson correlation between individuals (per cell type)
 # and combine it with correlation levels in the cell type 
 # (as both are below each other in the final figure)
+# Input: 
+# 1) correlation matrices per cell type generated with 
+#    correlation_timepoint_combined_indivs.py
+#    (for correlation levels in each cell type)
+# 2) correlation matrices per individual and cell type 
+#    (for comparison of individuals)
+# Output: plot and summary as output text
 #  -----------------------------------------------------------------------------
 
 library(data.table)
@@ -11,8 +18,6 @@ library(RColorBrewer)
 library(dplyr)
 
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
 
 path<-"coeqtl_mapping/input/individual_networks/UT/"
 
@@ -28,6 +33,7 @@ gg_color_hue <- function(n) {
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
+#Evaluate both Oelen v2 and v3 dataset
 for(dataset in c("onemillionv2","onemillionv3")){
   
   #Evaluate correlation distribution in the cell type
@@ -78,17 +84,17 @@ for(dataset in c("onemillionv2","onemillionv3")){
   #Get comparison between cell types
   summary<-NULL
   for(ct in cell_types){
-    #Load file with all correlation columns
+    #Load file with all correlation values per individual and cell type
+    #each individual one column
     if(dataset=="onemillionv3"){
       corr<-fread(paste0(path,dataset,"/UT_",ct,".genesnonzero0.5.coefs.gz"))
     } else {
       corr<-fread(paste0(path,dataset,"/UT_",ct,".genesnonzero0.5.coefs.tsv.gz"))
     }
   
-    #Get mean and variance for each gene pair
+    #Get Pearson correlation between individual-specific correlations
     gene_pairs<-corr$V1
     corr$V1<-NULL
-    
     indiv_corr<-cor(corr,method="pearson")
     
     #Melt the upper triangle
@@ -122,18 +128,15 @@ for(dataset in c("onemillionv2","onemillionv3")){
   g.1<-ggplot(all_corrs,aes(x=ct,y=freq,fill=level))+
     geom_bar(stat="identity")+
     xlab("Cell type")+ylab("Fraction correlated genes")+
-    # scale_fill_brewer("Absolute\ncorrelation",palette="YlGn",
-    #                   direction=-1)+
     scale_fill_manual("Absolute\ncorrelation",values=colors_bars[2:6])+
-    theme(#legend.position=c(0.92,0.75),
-          legend.position="bottom",
+    theme(legend.position="bottom",
           axis.title.y = element_text(size=13.5),
           axis.title.x = element_blank(),
           axis.text = element_text(size=12),
           legend.title=element_text(size=11),
           legend.text=element_text(size=10.5))
   
-  #Boxplot showing differences between individuals in the cell type
+  #Violin plot showing differences between individuals in the cell type
   summary$ct<-factor(summary$ct,levels=sorting$ct)
   g.2<-ggplot(summary,aes(x=ct,fill=ct,y=value))+
     geom_violin()+

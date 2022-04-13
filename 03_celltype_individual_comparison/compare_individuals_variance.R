@@ -1,6 +1,9 @@
 # ------------------------------------------------------------------------------
 # Combine gene pair variance across individuals 
 # for Oelen (v2) and (v3) in one plot (taking Z scores)
+# Input: correlation matrices per individual and cell type 
+#        (for comparison of individuals)
+# Output: plot and summary as output text
 # ------------------------------------------------------------------------------
 
 library(data.table)
@@ -9,8 +12,6 @@ library(ggplot2)
 library(ggpubr)
 
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
 
 path<-"coeqtl_mapping/input/individual_networks/UT/"
 
@@ -21,6 +22,7 @@ cell_types_corrected<-setNames(c("CD4+ T","CD8+ T","Monocyte","NK","DC","B"),
                                c("CD4T","CD8T","monocyte","NK","DC","B"))
 
 g_list<-NULL
+#Evaluate both Oelen v2 and v3 dataset
 for(dataset in c("onemillionv2","onemillionv3")){
   corr_summary<-NULL
   for(ct in cell_types){
@@ -32,13 +34,14 @@ for(dataset in c("onemillionv2","onemillionv3")){
       corr<-fread(paste0(path,dataset,"/UT_",ct,".genesnonzero0.5.zscores.gz"))
     }
     
-    #Get mean and variance for each gene pair (drop NA and Inf values from calculation)
     gene_pairs<-corr$V1
     corr$V1<-NULL
     
     #Set Inf values to NA to remove them afterwards
     corr<-as.matrix(corr)
     corr[is.infinite(corr)]<-NA
+    
+    #Get mean and variance for each gene pair (drop NA and Inf values from calculation)
     corr_summary<-rbind(corr_summary,
                    data.frame(ct,
                               gene_pairs,

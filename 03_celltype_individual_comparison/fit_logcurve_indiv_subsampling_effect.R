@@ -1,6 +1,11 @@
 # ------------------------------------------------------------------------------
-# Plot effect of number of cells on correlation between individuals
-# Correlation calculation done in python script (correlation_subsampling.py)
+# Fit logarithmic curve describing mean correlation between individuals dependent
+# on the number of cells per individual and cell type, fit down separately
+# for each cell type
+# Input: pairwise comparison of all individuals (Pearson correlation) per cell type
+#        and for different numbers of cells 
+#        (subsampling and calculation done in correlation_subsampling.py)
+# Output: logarithmic fit per cell type and curve visualizing the fit
 # ------------------------------------------------------------------------------
 
 library(ggplot2)

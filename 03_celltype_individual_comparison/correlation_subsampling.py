@@ -1,14 +1,21 @@
-######################################################################
-# Calculate per sample correlation with subsampled reads
-######################################################################
+####################################################################################
+# Calculate per sample correlation with subsampled number of cells per donor
+# to explore the relationship between number of cells and
+# and concordance between donors
+# Individuals with a total number of cells below the respective subsampled value
+# are not tested, sampling range from 25 cells to the 75% quantile for the cell type
+# (so that at least 25% of the individuals can be included each time)
+# Selecting again genes expressed in at least 50% of the cells
+# Input: seurat objects with Oelen v2 and v3 dataset
+# Output: Csv file with Pearson correlation values for all individual comparison
+#         per celltype and subsampled number of cells
+####################################################################################
 
 import scanpy as sc
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from scipy.stats import pearsonr, spearmanr
-#import matplotlib.pyplot as plt
-#import seaborn as sns
 
 def select_gene_nonzeroratio(df, ratio):
     '''
@@ -57,11 +64,11 @@ def calculate_correlation(celltype_df, celltype_obs, selected_genes, select_indi
     individual_indices = np.triu_indices_from(correlation_of_individual_correlations.values, k=1)
     return all_individuals_correlation, correlation_of_individual_correlations.values[individual_indices]
 
-# define path (run for version2 and 3 chemistry separately)
+# define path (run for Oelen v2 and v3 dataset separately)
 version2 = False
 if version2:
-    input_path = '/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/seurat_objects/1M_v2_mediumQC_ctd_rnanormed_demuxids_20201029.sct.h5ad'
-    output_path ='/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v2.csv'
+    input_path = 'seurat_objects/1M_v2_mediumQC_ctd_rnanormed_demuxids_20201029.sct.h5ad'
+    output_path ='co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v2.csv'
 else:
     input_path = '/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/seurat_objects/1M_v3_mediumQC_ctd_rnanormed_demuxids_20201106.SCT.h5ad'
     output_path ='/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v3.csv'
