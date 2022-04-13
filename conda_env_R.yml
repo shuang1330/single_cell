@@ -8,6 +8,7 @@ dependencies:
   - r-base=4.0.2
   - r-data.table
   - r-dplyr
+  - r-ggally
   - r-ggplot2
   - r-ggpubr
   - r-rcolorbrewer

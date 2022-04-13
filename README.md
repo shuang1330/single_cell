@@ -31,6 +31,8 @@ The following R packages are not part of conda and need to be added afterwards (
 ```
 if (!require("BiocManager")) install.packages('BiocManager') 
 BiocManager::install("tanaylab/metacell")
+
+devtools::install_github("heiniglab/scPower")
 ```
 
 Further external tools were used:
