@@ -1,6 +1,6 @@
 # 03_celltype_individual_comparison
 
-*compare_individuals_variance.R* : explore for all genes expressed in at least 50% of the cells the variance across individuals
+*compare_individuals_variance.R* : explores for all genes expressed in at least 50% of the cells the variance across individuals
 
 *correlation_between_celltypes.R* : calculates the Pearson correlation of gene pairwise Spearman correlation for all pairwise combinations of cell types within each dataset (for Oelen v2 and v3 dataset, input from *correlation_celltype.py*), taking only genes expressed in 50% of the cells in both cell types; plots results in heatmap afterwards
 
@@ -8,8 +8,8 @@
 
 *correlation_correlation_distribution_celltypes_and_individuals.R* : combines two basic overview plots: the correlation distribution in each cell type (input from *correlation_celltype.py*) and the concordance of donor-specific correlation (calculates Pearson correlation of gene pairwise Spearman correlation for each combination of individuals within each cell type)
 
-*correlation_subsampling.py* : calculating per donor correlation for each cell type and different numbers of cells for the sample (randomly subsampling to this number of cells), followed by comparison between donors for within the cell type and the subsampling step, taking genepairs expressed in 50% of the cells, using again Oelen v2 and v3 dataset separately
+*correlation_subsampling.py* : calculates per donor correlation for each cell type and different numbers of cells for the sample (randomly subsampling to this number of cells), followed by comparison between donors for within the cell type and the subsampling step, taking genepairs expressed in 50% of the cells, using again Oelen v2 and v3 dataset separately
 
-*fit_logcurve_indiv_subsampling_effect.R* : taking the results from *correlation_subsampling.py* and fitting logarithmic curves for the  relationship between number of cells and concordance between individuals, one per celltype, to better describe this relationship 
+*fit_logcurve_indiv_subsampling_effect.R* : tkes the results from *correlation_subsampling.py* and fitting logarithmic curves for the  relationship between number of cells and concordance between individuals, one per celltype, to better describe this relationship 
 
-*plot_indiv_subsampling_effect.R* : plot results from *correlation_subsampling.py* to show relationship between number of cells and concordance between individuals
+*plot_indiv_subsampling_effect.R* : plots results from *correlation_subsampling.py* to show relationship between number of cells and concordance between individuals
