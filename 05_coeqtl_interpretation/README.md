@@ -8,7 +8,5 @@
 
 *magma_coeqtl.Rmd*: R-markdown to perform MAGMA analysis for  GWAS enrichment separately for each set of coeGenes that share the same eQTL (for all eQTLs with at least 5 coeGenes)
 
-*plot_celltype_overlap_upset.R* :
-
 *snipe.R*: help functions to query SNiPA website for SNPs in high LD with query SNPs, used in *enrichment_TFs_Remap.R*
 

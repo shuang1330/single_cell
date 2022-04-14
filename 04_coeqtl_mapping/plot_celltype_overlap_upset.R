@@ -1,13 +1,11 @@
 # ------------------------------------------------------------------------------
 # Generate an upset plot of overlap between cell types
+# Input: significant co-eQTL results per cell type
+# Output: upset plot
 # ------------------------------------------------------------------------------
 
 library(data.table)
 library(UpSetR)
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
-
-outdir<-"coeqtl_interpretation/plots_filtered/"
   
 coeqtls_mono<-fread("coeqtl_mapping/output/filtered_results/UT_monocyte/coeqtls_fullresults_fixed.sig.tsv.gz")
 coeqtls_cd4t<-fread("coeqtl_mapping/output/filtered_results/UT_CD4T/coeqtls_fullresults_fixed.sig.tsv.gz")
