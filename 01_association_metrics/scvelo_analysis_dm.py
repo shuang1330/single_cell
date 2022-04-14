@@ -1,11 +1,10 @@
 """
-RNA velocyte analysis using the dynamic model
-run on all samples of version 3 chemistry and
-without monocytes 3 and 4
+RNA velocity analysis using the dynamic model
+run on all samples of Oelen v3 dataset for classical monocytes (mon1, mono2)
+and filtered for the 2000 most variable genes
 
-General problem of the dynamic model: much slower than the steady state model
-* Try to speed it up by reducing the number of filtered genes to the 2,000
-  most variable ones
+Input: loom files generated from velocyto
+Output: hd5ad object with RNA velocity estimates
 """
 
 import scvelo as scv
@@ -57,8 +56,7 @@ del ldata
 del ldata_array
 
 #Add information about cell types and time points (more annotations are available)
-annotations=pd.read_csv("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/seurat_object_meta.tsv", 
-                           sep='\t')
+annotations=pd.read_csv("seurat_object_meta.tsv", sep='\t')
 annotations=annotations.loc[ldata_filtered.obs.index.tolist(),:]
 ldata_filtered.obs["timepoint"]=annotations["timepoint"]
 ldata_filtered.obs["celltype"]=annotations["cell_type"]

@@ -1,17 +1,24 @@
 # ------------------------------------------------------------------------------
-# Check enrichment of TFBS among co-eGenes using Remap annotations
-# - Check for each cell type and coeGene cluster the enrichment (FDR correction over all)
+# Check enrichment of TFBS among co-eGenes using Remap 2022 annotations
+# - Check for each cell type and coeGene cluster the enrichment (FDR correction)
 # - Check if the enriched TF is itself part of the coeGenes
 # - Check if the SNP or a SNP in LD is part of the TF
+#
+# Input: TFBS from Remap2022 (filtered for blood cell types in script 
+#        enrichment_TFs_Remap_preprocessing.R), 
+#        gene annotation file,
+#        coeQTL results (complete result with all tested genes to 
+#        define also the background)
+# Output: signficant enrichment results with information about overlap 
+#         between TF and co-eQTL SNP
 # ------------------------------------------------------------------------------
 
 library(rtracklayer)
 library(data.table)
 
-#setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
+source("snipe.R")
 
-#peaks<-import("tfbs_enrichment_remap/remap2022_nr_macs2_hg19_v1_0_blood_related.bed")
-peaks<-import("tfbs_enrichment_remap/remap2015_blood_related.bed")
+peaks<-import("tfbs_enrichment_remap/remap2022_nr_macs2_hg19_v1_0_blood_related.bed")
 
 # Split name into TF and measured cell lines
 ann <- t(matrix(unlist(strsplit(values(peaks)[,"name"], ":", fixed=T)), nrow=2))
@@ -32,18 +39,16 @@ tfs<-as.character(unique(ann$TF))
 ################################################################################
 
 gene_annot<-import("tfbs_enrichment_remap/genes.gtf")
-#gene_annot<-import("additional_files/genes.gtf")
 gene_annot<-gene_annot[gene_annot$type =="gene",]
 gene_annot<-keepStandardChromosomes(gene_annot, pruning.mode="coarse")
 
 #Read coeQTL file (all tests)
 tf_enrichment_combined<-NULL
+total_set_tested_eqtls<-NULL
 for(ct in c("CD4T","CD8T","monocyte","NK","DC","B")){
   
-  # coeqtls<-fread(paste0("coeqtl_mapping/output/filtered_results/UT_",ct,
-  #                       "/coeqtls_fullresults_fixed.all.tsv.gz"))
-  coeqtls<-fread(paste0("coeqtl_results/UT_",ct,
-                        "_coeqtls_fullresults_fixed.all.tsv.gz"))
+  coeqtls<-fread(paste0("coeqtl_mapping/output/filtered_results/UT_",ct,
+                        "/coeqtls_fullresults_fixed.all.tsv.gz"))
   coeqtls$gene1<-gsub(";.*","",coeqtls$Gene)
   coeqtls$gene2<-gsub(".*;","",coeqtls$Gene)
   coeqtls$eqtlgene<-gsub(".*_","",coeqtls$snp_eqtlgene)
@@ -85,6 +90,9 @@ for(ct in c("CD4T","CD8T","monocyte","NK","DC","B")){
   coeqtls_sign<-coeqtls[coeqtls$gene2_isSig,]
   occ_eqtl<-as.data.frame(table(coeqtls_sign$snp_eqtlgene))
   occ_eqtl<-occ_eqtl[occ_eqtl$Freq>=5,]
+  occ_eqtl$cell_type<-ct
+  total_set_tested_eqtls<-rbind(total_set_tested_eqtls,
+                                occ_eqtl)
   
   #Perform Fisher's test for the enrichment
   fisher_all_eqtl<-NULL
@@ -121,9 +129,80 @@ for(ct in c("CD4T","CD8T","monocyte","NK","DC","B")){
     fisher_all_eqtl<-rbind(fisher_all_eqtl,fisher_res)
   }
   
+  #Check for CD4T specificallly for RPS26 the positive & negative coeGenes separately
+  if(ct=="CD4T"){
+    eqtl<-"rs1131017_RPS26"
+    
+    #Test positive coeGenes (MAF not correctly flipped here)
+    sign_gene2<-coeqtls_sign$gene2[coeqtls_sign$snp_eqtlgene==eqtl
+                                   & coeqtls_sign$MetaPZ < 0]
+    sign_gene2<-intersect(sign_gene2,rownames(tfbs_ann))
+    
+    #Iterate over each TF
+    fisher_res<-NULL
+    for(tf in colnames(tfbs_ann)){
+      
+      counts<-data.frame(tf_binding=c(sum(tfbs_ann[sign_gene2,tf]),sum(tfbs_ann[,tf])),
+                         tf_nonbinding=c(sum(!tfbs_ann[sign_gene2,tf]),sum(!tfbs_ann[,tf])))
+      
+      res_fisher<-fisher.test(counts,alternative="greater")
+      
+      fisher_res<-rbind(fisher_res,
+                        data.frame(celltype=ct,
+                                   eqtl=paste0(eqtl,"_positive"),
+                                   tf,
+                                   is_coeGene = tf %in% sign_gene2,
+                                   fisher_pval=res_fisher$p.value,
+                                   tf_coeqtl=counts$tf_binding[1],
+                                   notf_coeqtl=counts$tf_nonbinding[1],
+                                   tf_background=counts$tf_binding[2],
+                                   notf_background=counts$tf_nonbinding[2]))
+    }
+    
+    #Multiple testing correction per eQTL
+    fisher_res$fisher_fdr<-p.adjust(fisher_res$fisher_pval,method="BH")
+    fisher_all_eqtl<-rbind(fisher_all_eqtl,fisher_res)
+    
+    #Test negative coeGenes (MAF not correctly flipped here)
+    sign_gene2<-coeqtls_sign$gene2[coeqtls_sign$snp_eqtlgene==eqtl
+                                   & coeqtls_sign$MetaPZ > 0]
+    sign_gene2<-intersect(sign_gene2,rownames(tfbs_ann))
+    
+    #Iterate over each TF
+    fisher_res<-NULL
+    for(tf in colnames(tfbs_ann)){
+      
+      counts<-data.frame(tf_binding=c(sum(tfbs_ann[sign_gene2,tf]),sum(tfbs_ann[,tf])),
+                         tf_nonbinding=c(sum(!tfbs_ann[sign_gene2,tf]),sum(!tfbs_ann[,tf])))
+      
+      res_fisher<-fisher.test(counts,alternative="greater")
+      
+      fisher_res<-rbind(fisher_res,
+                        data.frame(celltype=ct,
+                                   eqtl=paste0(eqtl,"_negative"),
+                                   tf,
+                                   is_coeGene = tf %in% sign_gene2,
+                                   fisher_pval=res_fisher$p.value,
+                                   tf_coeqtl=counts$tf_binding[1],
+                                   notf_coeqtl=counts$tf_nonbinding[1],
+                                   tf_background=counts$tf_binding[2],
+                                   notf_background=counts$tf_nonbinding[2]))
+    }
+    
+    #Multiple testing correction per eQTL
+    fisher_res$fisher_fdr<-p.adjust(fisher_res$fisher_pval,method="BH")
+    
+    fisher_all_eqtl<-rbind(fisher_all_eqtl,fisher_res)
+  
+  }
+  
   tf_enrichment_combined<-rbind(tf_enrichment_combined,
                                 fisher_all_eqtl[fisher_all_eqtl$fisher_fdr<0.05,])
+  
 }
+
+table(tf_enrichment_combined$eqtl,tf_enrichment_combined$celltype)
+tf_enrichment_combined[tf_enrichment_combined$is_coeGene,]
 
 ################################################################################
 # Part 2: check if the SNP (a SNP in high LD) is in the TF peak
@@ -132,9 +211,6 @@ for(ct in c("CD4T","CD8T","monocyte","NK","DC","B")){
 tf_enrichment_combined$eqtlsnp<-gsub("_.*","",tf_enrichment_combined$eqtl)
 
 #Get all SNPs in LD with the enriched eQTL SNP
-
-source("../R/get_ld/snipe.R")
-
 enriched_snps<-unique(tf_enrichment_combined$eqtlsnp)
 
 proxies <- snipa.get.ld.by.snp(enriched_snps,
@@ -170,4 +246,13 @@ write.table(tf_enrichment_combined,
 write.table(proxies,
             file="tfbs_enrichment_remap/ld_proxies_with_position.tsv",
             sep="\t",quote=FALSE,row.names=FALSE)
+
+#Filter for SNPs which overlap with the TF
+tf_enrichment_overlap<-tf_enrichment_combined[tf_enrichment_combined$snp_tf_overlap,]
+
+table(tf_enrichment_combined$eqtl,tf_enrichment_combined$celltype)
+table(tf_enrichment_overlap$eqtl,tf_enrichment_overlap$celltype)
+tfs_coegenes<-tf_enrichment_overlap[tf_enrichment_overlap$is_coeGene,c("celltype","eqtl","tf")]
+tfs_coegenes[,c("celltype","eqtl","tf")]
+
 

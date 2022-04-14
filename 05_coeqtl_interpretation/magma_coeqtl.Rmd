@@ -1,7 +1,7 @@
 ---
-title: "GWAS signals in microbiome interactors"
+title: "GWAS signals in co-eQTL genes"
 author: "Matthias Heinig"
-date: "14.02.2021"
+date: "30.03.2022"
 output: html_document
 knit: (
   function(inputFile, encoding) { 
@@ -15,6 +15,20 @@ knit: (
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+
+################################################################################
+# Script to perform GWAS enrichment analysis for coeGenes that share the same
+# eQTL (for all eQTLs with at least 5 coeGenes)
+# Additionally to the R packages, the tool MAGMA needs to be downloaded
+# (https://ctg.cncr.nl/software/magma)
+#
+# Input: co-eQTL results (combined in one file with cell type column),
+#        file with all tested genes in co-eQTL analysis as background,
+#        GWAS summary statistics processed by the GTEx consortium
+#        (https://zenodo.org/record/3518299)
+# Output: file with MAGMA enrichment results
+###############################################################################
+
 .libPaths(c("~/packages/R/x86_64-redhat-linux-gnu-library/3.6/", .libPaths()))
 knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=7)
 knitr::opts_knit$set(root.dir=normalizePath(".."))
@@ -32,7 +46,6 @@ library(Rgraphviz) # plot networks
 library(Homo.sapiens) # annotation data
 library(scales)
 library(RColorBrewer)
-library(ggpubr)
 
 theme_set(theme_bw())
 ```

@@ -1,27 +1,14 @@
 # ------------------------------------------------------------------------------
-# Check enrichment of TFBS among co-eGenes using Remap annotations
-# Part 1) filter Remap file for blood related cell lines 
+# Preparation of enrichment of TFBS among co-eGenes using Remap annotations:
+# filter Remap file for blood related cell lines 
 # (due to size of file this takes some time)
+# Input: bed file from Remap 2022 (from https://remap.univ-amu.fr/download_page)
+# Output: bed file filtered for blood cell lines 
 # ------------------------------------------------------------------------------
 
 library(rtracklayer)
 
-# Old version of Remap (2015)
-# peaks<-import("tfbs_enrichment_remap/filPeaks_all.bed")
-# 
-# # Filter blood related cell lines
-# ann <- t(matrix(unlist(strsplit(values(peaks)[,"name"], ".", fixed=T)), nrow=3))
-# colnames(ann) <- c("geo_id", "TF", "condition")
-# ann <- as.data.frame(ann,stringsAsFactors=FALSE)
-# blood_related_terms<-c("amlpz12_leukemic", "aplpz74_leukemia",
-#                        "bcell", "bjab", "bl41",
-#                        "blood", "lcl", "erythroid", "gm",
-#                        "hbp", "k562", "kasumi",
-#                        "lymphoblastoid", "mm1s", "p493",
-#                        "plasma", "sem", "thp1", "u937")
-
-
-#Read peak file from new version (Remap2022) (different format, as all peaks file gets too large)
+#Read peak file from Remap2022
 peaks<-import("tfbs_enrichment_remap/remap2022_nr_macs2_hg19_v1_0.bed.gz")
 
 # Filter blood related cell lines
