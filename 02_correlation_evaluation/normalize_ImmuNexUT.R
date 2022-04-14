@@ -1,5 +1,17 @@
 # ------------------------------------------------------------------------------
-# Normalize ImmunoNext data
+# Normalize ImmuNexUT data (separately for each cell type with a matching
+# single-cell cell type) following the description in the corresponding
+# publication (filtering lowly expressed genes, TMM normalization and 
+# batch correction)
+# followed by correlation calculation for all genes expressed in 50% of the cells
+# of the Oelen v3 dataset (for comparison with single cell data)
+# Input: Count matrices downloaded from 
+#        https://humandbs.biosciencedbc.jp/en/hum0214-v5#E-GEAD-397,
+#        correlation estimates from Oelen v3 to identify the expressed genes
+#        for downstream comparisons
+# Output: normalized count matrices (one per cell type), orrelation matrices
+#         for all genes expressed in 50% of the cells of the Oelen v3 dataset and
+#         plots for comparison between ImmuNexUT and Oelen v3 dataset
 # ------------------------------------------------------------------------------
 
 library(data.table)
@@ -10,8 +22,6 @@ library(ggplot2)
 library(viridis)
 
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
 
 # Cell type matching
 ct_mapping<-data.frame(sc_ct=c("CD4T","CD8T","B","monocyte","NK","DC"),
@@ -48,7 +58,6 @@ for(i in 1:nrow(ct_mapping)){
                     #is not working in combination with combat ...
     
     #Remove batch data using combat
-    #batch_data<-fread("imd_paper_rna_data/E-GEAD-397.sdrf.txt")
     batch_data<-fread("imd_paper_rna_data/clinical_diagnosis_age_sex_v2.txt")
     
     #Filter batch data for samples in the matrix
@@ -72,8 +81,6 @@ for(i in 1:nrow(ct_mapping)){
     # dev.off()
     
     #Combine genes that appear multiple times in the matrix 
-    # gene_occ<-as.data.frame(table(rownames(combat_tmm)))
-    # head(gene_occ[order(gene_occ$Freq,decreasing=TRUE),])
     combat_tmm<- apply(combat_tmm, 2, tapply, rownames(combat_tmm),
                        mean, na.rm=T)
     

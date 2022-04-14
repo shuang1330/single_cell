@@ -1,7 +1,7 @@
-######################################################################
-# Calculate correlation for each cell type and timepoint (UT,3h,24h)
+###########################################################################################
+# Calculate correlation for each cell type, selecting always one timepoint (UT)
 # merging all individuals
-######################################################################
+###########################################################################################
 
 #from scipy.stats import t, norm
 from scipy.stats import spearmanr
@@ -13,18 +13,11 @@ from time import time
 import os
 import re
 
-# specify if the gene selection was done before and is passed in a file
+# specify if Oelen v3 or v2 dataset should be used
 version2 = True
-gene_selection_file = False
-
-# set working directory (to shorten path length)
-#os.chdir('/groups/umcg-lld/tmp04/projects/1MCellRNAseq/GRN_reconstruction/ongoing')
-os.chdir('/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing')
 
 # load scanpy object
-if gene_selection_file:
-    prefix_results = Path('co-expression_indivs_combined/coexp_tp_union/')
-elif version2:    
+lif version2:
     prefix_results = Path('co-expression_indivs_combined/one_million_version2/')
 else:
     prefix_results = Path('co-expression_indivs_combined/')

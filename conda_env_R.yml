@@ -5,7 +5,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - bioconductor-edger
+  - bioconductor-sva
   - r-base=4.0.2
+  - r-corrplot
   - r-data.table
   - r-dplyr
   - r-ggally

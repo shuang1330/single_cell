@@ -2,6 +2,12 @@
 # Create barplot of correlation dependency on expression cutoff
 # for Oelen v3 and ImmuNexUT / Blueprint
 # (only plotting in R, calculation done with python script)
+# Input: correlation comparison between Blueprint and Oelen v3 dataset 
+#        (precalculated in compare_blueprint_cutoffs_CD4T.py) and between
+#        ImmuNexUT and Oelen v3 dataset (precalculated in 
+#        compare_immunexut_cutoffs_CD4T.py)
+# Output: two barplots, one for Blueprint comparsion and one for 
+#         ImmuNexUT comparison
 # ------------------------------------------------------------------------------
 
 library(ggplot2)

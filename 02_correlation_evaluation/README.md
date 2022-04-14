@@ -1,13 +1,9 @@
 # 02_correlation_evaluation
 
-*compare_individuals_variance.R* : explore for all genes expressed in at least 50% of the cells the variance across individuals
+*compare_blueprint_cutoffs_CD4T.py* : Compare correlation between Blueprint and single cell (Oelen v3 dataset) for different expression thresholds (number of cells expressing the gene), implemented for UT and CD4+ T cells here
 
-*correlation_between_celltypes.R* : calculates the Pearson correlation of genepair wise Spearman correlation for all pairwise combinations of cell types within each dataset (for Oelen dataset (V2) and (V3)), taking only genes expressed in 50% of the cells in both cell types; plots results in heatmap afterwards
+*compare_immunexut_cutoffs_CD4T.py*: Same approach as in *compare_blueprint_cutoffs_CD4T.py*, but comparing correlation between ImmuNexUT and Oelen v3 dataset instead
 
-*correlation_celltype.py* : calculates Spearman correlation for each genepair expressed in 50% of the cells for Oelen dataset (V2) and (V3), separately per cell type, but combing all individuals; provides so the input csv files for *correlation_between_celltypes.R*
+*figure2_barplot_cutoffs.R*: create barplots from the results of *compare_blueprint_cutoffs_CD4T.py* and *compare_immunexut_cutoffs_CD4T.py*
 
-*correlation_correlation_distribution_celltypes_and_individuals.R* :
-
-*correlation_subsampling.py* :
-
-*plot_indiv_subsampling_effect.R* :
+*normalize_ImmuNexUT.R*: preprocessingImmuNexUT data (separately for each cell type with a matching single-cell cell type) following the description in the corresponding publication (filtering lowly expressed genes, TMM normalization and batch correction) followed by correlation calculation for all genes expressed in 50% of the cells of the Oelen v3 dataset (for comparison with single cell data)
