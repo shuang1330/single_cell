@@ -30,4 +30,5 @@ dependencies:
   - r-seurat
   - r-stringr
   - r-tidyverse
+  - r-upsetr
   - r-viridis
