@@ -1,7 +1,9 @@
 # 01_association_metrics
 
 
-*GRNBoost2.ipynb*: examine the GRNBoost2 results for scRNAseq and for BIOS data
+In *setting_files_for_grnboost2* there are setting files for running GRNBoost2 on scRNAseq and BIOS data
+
+*GRNBoost2.ipynb*: Prepare the input files for BEELINE, and examine the GRNBoost2 results for scRNAseq and for BIOS data
 
 *scorpius_and_slingshot_clean.R*: calculates the pseudotime ordering for Oelen v2 classical monocytes, using SCORPIUS and Slingshot algorithms
 
