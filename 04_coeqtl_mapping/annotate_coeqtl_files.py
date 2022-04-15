@@ -16,7 +16,7 @@ celltype = args.celltype
 filtertype = args.filtertype
 networkcelltype = args.networkcelltype
 # filtertype = 'filtered_results'
-workdir = Path("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/")
+workdir = Path("./coeqtl_mapping/")
 coeqtl_filepath = workdir/f'output/{filtertype}/UT_{celltype}/coeqtls_fullresults_fixed.all.tsv.gz'
 
 def find_gene2(genepair, eqtlgene):
@@ -31,7 +31,7 @@ coeqtl_df['gene2'] = [find_gene2(item[0], item[1]) for item in coeqtl_df[['Gene'
 unique_genepairs = list(set(coeqtl_df['Gene']))
 
 
-network_prefix = Path("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/input/individual_networks/UT/")
+network_prefix = Path("./coeqtl_mapping/input/individual_networks/UT/")
 def annotate_by_datasets(datasetname, coeqtl_df, unique_genepairs):
     def read_numpy(prefix):
         data = np.load(f'{prefix}.npy')
@@ -58,7 +58,7 @@ for datasetname in ['onemillionv2', 'onemillionv3', 'stemiv2', 'ng']:
 
 def annotate_with_nonzero(df, celltype, datasetname, condition='UT'):
     nonzeroratio_prefix = Path(
-        "/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/input/gene_pair_selection/annotations/")
+        "./coeqtl_mapping/input/gene_pair_selection/annotations/")
     nonzeroratio_path = nonzeroratio_prefix/f'{datasetname}.genes_nonzeroratio.tsv'
     nonzero_df = pd.read_csv(nonzeroratio_path, sep='\t', index_col=0)
     if condition == 'UT' and datasetname == 'stemiv2':
