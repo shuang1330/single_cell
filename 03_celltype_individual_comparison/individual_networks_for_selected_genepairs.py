@@ -1,15 +1,15 @@
+import argparse
 import os
 import re
+from collections import namedtuple
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import scanpy as sc
+from scipy.stats import rankdata
 from scipy.stats import t, norm
 from tqdm import tqdm
-import argparse
-from scipy.stats import rankdata
-from collections import namedtuple
 
 
 def get_time(x):
@@ -23,8 +23,9 @@ def get_time(x):
 class DATASET:
     def __init__(self, datasetname):
         self.name = datasetname
-        self.path_prefix = Path("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/seurat_objects")
+        self.path_prefix = Path("./")
         self.information = self.get_information()
+
     def get_information(self):
         if self.name == 'onemillionv2':
             self.path = '1M_v2_mediumQC_ctd_rnanormed_demuxids_20201029.sct.h5ad'
@@ -53,6 +54,7 @@ class DATASET:
             self.celltype_id = 'cell_type_mapped_to_onemillion'
         else:
             raise IOError("Dataset name not understood.")
+
     def load_dataset(self):
         self.get_information()
         print(f'Loading dataset {self.name} from {self.path_prefix} {self.path}')
@@ -63,8 +65,7 @@ class DATASET:
             celltype_maping = {'CD4 T': 'CD4T', 'CD8 T': 'CD8T', 'Mono': 'monocyte', 'DC': 'DC', 'NK': 'NK',
                                'other T': 'otherT', 'other': 'other', 'B': 'B'}
             self.data_sc.obs['cell_type_mapped_to_onemillion'] = [celltype_maping.get(name) for name in
-                                                          self.data_sc.obs['predicted.celltype.l1']]
-
+                                                                  self.data_sc.obs['predicted.celltype.l1']]
 
 
 def select_gene_nonzeroratio(df, ratio):
@@ -102,6 +103,7 @@ def save_numpy(data_df, prefix):
     with open(f'{prefix}.rows.txt', 'w') as f:
         f.write('\n'.join(data_df.index))
     return None
+
 
 def _contains_nan(a, nan_policy='propagate'):
     policies = ['propagate', 'raise', 'omit']
@@ -160,7 +162,7 @@ def spearmanr_withnan(a, axis=0, nan_policy='propagate'):
     dof = n_obs - 2  # degrees of freedom
     # rs can have elements equal to 1, so avoid zero division warnings
     with np.errstate(divide='ignore'):
-        t_ = rs * np.sqrt((dof/((rs+1.0)*(1.0-rs))).clip(0))
+        t_ = rs * np.sqrt((dof / ((rs + 1.0) * (1.0 - rs))).clip(0))
     prob = 2 * t.sf(np.abs(t_), dof)
     # For backwards compatibility, return scalars when comparing 2 columns
     if rs.shape == (2, 2):
@@ -191,14 +193,16 @@ def get_individual_networks_halfratioGenes(data_sc, individual_colname, selected
             individual_df = data_selected_df.loc[data_sc.obs[individual_colname] == ind_id]
             individual_coefs, individual_coef_ps = spearmanr_withnan(individual_df.values, axis=0)
             individual_coefs_flatten = pd.DataFrame(data=individual_coefs[np.triu_indices_from(individual_coefs, 1)],
-                                                    index=selected_genes_sorted_genepairs).loc[selected_genes_sorted_genepairs]
+                                                    index=selected_genes_sorted_genepairs).loc[
+                selected_genes_sorted_genepairs]
             individual_coef_ps_flatten = \
-            pd.DataFrame(data=individual_coef_ps[np.triu_indices_from(individual_coefs, 1)],
-                         index=selected_genes_sorted_genepairs).loc[selected_genes_sorted_genepairs]
+                pd.DataFrame(data=individual_coef_ps[np.triu_indices_from(individual_coefs, 1)],
+                             index=selected_genes_sorted_genepairs).loc[selected_genes_sorted_genepairs]
             coef_df[ind_id] = individual_coefs_flatten
             coef_p_df[ind_id] = individual_coef_ps_flatten
             try:
-                individual_zscores_flatten, individual_zscore_ps_flatten = corr_to_z(individual_coefs_flatten.values, cell_num)
+                individual_zscores_flatten, individual_zscore_ps_flatten = corr_to_z(individual_coefs_flatten.values,
+                                                                                     cell_num)
                 zscore_df[ind_id] = individual_zscores_flatten
                 zscore_p_df[ind_id] = individual_zscore_ps_flatten
             except:
@@ -208,7 +212,8 @@ def get_individual_networks_halfratioGenes(data_sc, individual_colname, selected
     return coef_df, coef_p_df, zscore_df, zscore_p_df
 
 
-def get_individual_networks_given_celltype_condition_datasetname_for_6major_celltypes(datasetname, condition='UT', genelist=None):
+def get_individual_networks_given_celltype_condition_datasetname_for_6major_celltypes(datasetname, condition='UT',
+                                                                                      genelist=None):
     # load the data and data information
     celltypes = ['CD4T', 'CD8T', 'monocyte', 'NK', 'B', 'DC']
     dataset = DATASET(datasetname)
@@ -221,15 +226,17 @@ def get_individual_networks_given_celltype_condition_datasetname_for_6major_cell
             data_selected = dataset.data_sc[(dataset.data_sc.obs[dataset.celltype_id] == celltype)]
         else:
             data_selected = dataset.data_sc[(dataset.data_sc.obs[dataset.celltype_id] == celltype) &
-                                            (dataset.data_sc.obs[dataset.timepoint_id_col] == dataset.chosen_condition[condition])]
+                                            (dataset.data_sc.obs[dataset.timepoint_id_col] == dataset.chosen_condition[
+                                                condition])]
         individual_coefs_df, individual_coefs_p_df, individual_zscores_df, individual_zscores_p_df = \
             get_individual_networks_halfratioGenes(
-            data_selected,
-            dataset.individual_id_col,
+                data_selected,
+                dataset.individual_id_col,
                 genelist
-        )
+            )
         print(individual_coefs_df.head())
-        save_prefix = Path('/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/input')
+        save_prefix = Path(
+            '/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/input')
         if not os.path.exists(save_prefix / 'individual_networks' / condition / datasetname):
             os.mkdir(save_prefix / 'individual_networks' / condition / datasetname)
         individual_coefs_df.to_csv(
@@ -239,65 +246,23 @@ def get_individual_networks_given_celltype_condition_datasetname_for_6major_cell
             save_prefix / 'individual_networks' / condition / datasetname / f'{condition}_{celltype}.genesnonzero0.5.zscores.gz',
             sep='\t', compression='gzip')
         print("Saved ")
+    return None
 
 
 def argumentsparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasetname', type=str, dest='datasetname')
-    parser.add_argument('--celltype', type=str, dest='celltype')
     parser.add_argument('--condition', type=str, dest='condition')
-    parser.add_argument('--genelist', type=float, dest='genelist')
-    parser.add_argument('--saveprefix', type=float, dest='saveprefix')
     return parser
 
 
 def run_get_individual_networks_given_celltype_condition_datasetname():
     args = argumentsparser().parse_args()
-    print(f"Starting to calculate individual network for {args.datasetname}, {args.celltype}, {args.condition}, "
-          f"for genes {args.genelist}.")
-    genelist = [item for item in open(args.genelist, 'r').readlines()]
-    _ = get_individual_networks_given_celltype_condition_datasetname_for_6major_celltypes(celltype=args.celltype,
-                                                                 condition=args.condition,
-                                                                 datasetname=args.datasetname,
-                                                                     genelist=genelist,
-                                                                     savepath=args.saveprefix)
+    print(f"Starting to calculate individual network for {args.datasetname}, {args.celltype}, {args.condition}.")
+    get_individual_networks_given_celltype_condition_datasetname_for_6major_celltypes(condition=args.condition,
+                                                                                      datasetname=args.datasetname)
     return None
 
-#
-
-# monocytes_df = pd.read_csv(workdir/'UT_monocyte.genesnonzero0.5.coefs.tsv.gz', sep='\t', compression='gzip', index_col=0)
-# CD4T_df = pd.read_csv(workdir/'UT_CD4T.genesnonzero0.5.coefs.tsv.gz', sep='\t', compression='gzip', index_col=0)
-
-
-from tqdm import tqdm
-datasetname = 'onemillionv3'
-dataset = DATASET(datasetname)
-dataset.load_dataset()
-workdir = Path("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
-for celltype in ['CD4T', 'CD8T', 'monocyte', 'DC', 'NK', 'B']:
-    print(celltype)
-    celltype_sc = dataset.data_sc[(dataset.data_sc.obs[dataset.celltype_id]==celltype) &
-                                  (dataset.data_sc.obs['timepoint']=='UT')]
-    res_df = pd.DataFrame(index=celltype_sc.var.index)
-    for sampleid in tqdm(celltype_sc.obs['assignment'].unique()):
-        individual_sc = celltype_sc[celltype_sc.obs['assignment']==sampleid]
-        genenames = individual_sc.var.index
-        individual_df = pd.DataFrame(data=individual_sc.X.toarray(),
-                                     index=individual_sc.obs.index,
-                                     columns=individual_sc.var.index)
-        res_df[f'{sampleid}'] = np.nanvar(individual_df[genenames].values, axis=0)
-    res_df.to_csv(workdir/ 'expression_variances_per_individual' / f'expression_variances_per_individual.{datasetname}.UT.{celltype}.tsv', sep='\t',
-                  compression='gzip')
-
-mean_df = pd.DataFrame()
-for celltype in ['CD4T', 'CD8T', 'monocyte', 'DC', 'NK', 'B']:
-    celltype_df = pd.read_csv(workdir/ 'expression_variances_per_individual' / f'expression_variances_per_individual.onemillionv2.UT.{celltype}.tsv', sep='\t',
-                  compression='gzip', index_col=0)
-    sampleids = celltype_df.columns.copy()
-    celltype_df[celltype] = np.nanmean(celltype_df[sampleids], axis=1)
-    mean_df = pd.concat([mean_df, celltype_df[[celltype]]], axis=1)
-
-mean_df.to_csv(workdir/ 'expression_variances_per_individual' / f'mean_of_expression_variances_per_individual.onemillionv2.UT.tsv', sep='\t')
 
 if __name__ == '__main__':
     run_get_individual_networks_given_celltype_condition_datasetname()
