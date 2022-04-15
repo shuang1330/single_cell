@@ -10,3 +10,6 @@
 
 *snipe.R*: help functions to query SNiPA website for SNPs in high LD with query SNPs, used in *enrichment_TFs_Remap.R*
 
+*LDTRAIT.ipynb*: Add GWAS annotation to SNP / SNP in LD
+
+*TEM_NAIVE.ipynb*: Examine the impact of rs1131017 on the ratio between TEM and naive T cells
