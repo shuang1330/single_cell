@@ -38,7 +38,7 @@ devtools::install_github("heiniglab/scPower")
 Further external tools were used:
 
 * To calculate the eQTLs See the documentation [here](https://github.com/molgenis/systemsgenetics/wiki/eQTL-mapping-analysis-cookbook-for-RNA-seq-data).
-* To calculate the co-eQTLs: [betaQTL](https://github.com/molgenis/systemsgenetics/tree/master/BetaQTL).
+* To calculate the co-eQTLs: [mbQTL](https://github.com/molgenis/systemsgenetics/tree/master/mbQTL).
 * To perform GWAS enrichment analysis on the co-eQTL genes: [MAGMA](https://ctg.cncr.nl/software/magma).
 
 
