@@ -236,7 +236,7 @@ def get_individual_networks_given_celltype_condition_datasetname_for_6major_cell
             )
         print(individual_coefs_df.head())
         save_prefix = Path(
-            '/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/coeqtl_mapping/input')
+            'coeqtl_mapping/input')
         if not os.path.exists(save_prefix / 'individual_networks' / condition / datasetname):
             os.mkdir(save_prefix / 'individual_networks' / condition / datasetname)
         individual_coefs_df.to_csv(

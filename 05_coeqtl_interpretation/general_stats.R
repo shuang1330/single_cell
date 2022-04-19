@@ -8,8 +8,6 @@
 library(data.table)
 library(dplyr)
 
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
-
 coeqtl_dir<-"coeqtl_mapping/output/filtered_results/"
 
 all_counts<-NULL

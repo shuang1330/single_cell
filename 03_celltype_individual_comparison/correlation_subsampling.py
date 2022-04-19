@@ -70,8 +70,8 @@ if version2:
     input_path = 'seurat_objects/1M_v2_mediumQC_ctd_rnanormed_demuxids_20201029.sct.h5ad'
     output_path ='co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v2.csv'
 else:
-    input_path = '/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/seurat_objects/1M_v3_mediumQC_ctd_rnanormed_demuxids_20201106.SCT.h5ad'
-    output_path ='/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v3.csv'
+    input_path = 'seurat_objects/1M_v3_mediumQC_ctd_rnanormed_demuxids_20201106.SCT.h5ad'
+    output_path ='co-expression_indivs_subsampled/correlation_individuals_subsampled_1M_v3.csv'
 
 # load single cell data
 alldata = sc.read_h5ad(input_path)
