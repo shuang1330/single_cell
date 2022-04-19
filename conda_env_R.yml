@@ -14,6 +14,7 @@ dependencies:
   - bioconductor-rcy3
   - bioconductor-rgraphviz
   - bioconductor-rtracklayer 
+  - bioconductor-singlecellexperiment
   - bioconductor-sva
   - r-base=4.0.2
   - r-corrplot
@@ -24,11 +25,15 @@ dependencies:
   - r-ggplot2
   - r-ggpubr
   - r-gtools
+  - r-hmisc
   - r-httr
   - r-igraph
   - r-kableextra
   - r-knitr
   - r-magrittr
+  - r-matrix
+  - r-optparse
+  - r-propr
   - r-rcolorbrewer
   - r-reshape2
   - r-reticulate

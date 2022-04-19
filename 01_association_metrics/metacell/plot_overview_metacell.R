@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
 # Supplementary figure to show MetaCell overview
-# * Expression distribution of genes in a cell (see expressed_genes_comparison.R)
-# * number of (meta)cells per sample (see distribution_metacells_sample_allMethods.R)
-# * comparison with Blueprint (see eval_blueprint_genesSets_plot.R)
+# * Expression distribution of genes in a cell
+# * number of (meta)cells per sample
+# * comparison with Blueprint
 # ------------------------------------------------------------------------------
 
 library(Seurat)
@@ -10,10 +10,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 
-
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp04/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
 
 # ------------------------------------------------------------------------------
 # Expression distribution of genes in a cell
@@ -163,15 +160,13 @@ res$method<-rename_methods[res$method]
 g.3<-ggplot(res,aes(x=cutoff,y=Corr_corr,fill=method))+
   geom_bar(stat="identity",position="dodge")+
   ylab("Correlation with BLUEPRINT")+
-  xlab("Genes stratified by x% expression in single cell")+#ylim(-0.3,0.6)+
+  xlab("Genes stratified by x% expression in single cell")+
   scale_fill_discrete("Method")+
-  #scale_fill_manual("Method",values=colors[c(2,1,4,6,8,7)])+
   theme(legend.position = "bottom",
         axis.title = element_text(size=14),
         axis.text = element_text(size=13),
         legend.title = element_text(size=13),
         legend.text= element_text(size=13))
-#print(g)
 
 g.bottom<-ggarrange(g.2,g.3,ncol=2,widths=c(0.4,0.6),
                     common.legend = TRUE,legend="bottom",
