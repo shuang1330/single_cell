@@ -1,6 +1,8 @@
 # -----------------------------------------------------------------------------
 # Count number of second genes per eQTL (across all cell types)
 # And the distribution of effect sizes across cell types
+# Input: significnat coeQTL results for all cell types
+# Output: printed summary statistics
 # -----------------------------------------------------------------------------
 
 library(data.table)

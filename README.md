@@ -15,7 +15,7 @@ The code for the analysis is separated in different steps, each in its own subdi
 * Comparing correlation between the different single cell data sets, with bulk data and CRISPR knock-out data; testing potential occurence of Simpson's paradox [02_correlation_evaluation/](02_correlation_evaluation/)
 * Comparing correlation between different cell types and between different individuals within one cell type [03_celltype_individual_comparison/](03_celltype_individual_comparison/)
 * Running eQTL and coeQTL mapping pipelines followed by replication in bulk and technical evaluation of the co-eQTLs, such as correlation distribution, sub cell type effects and effects of subsampling cells or donors [04_coeqtl_mapping/](04_coeqtl_mapping/)
-* Interpretation of co-eQTL results with GWAS annotation, GO enrichment, ... [05_coeqtl_interpretation/](05_coeqtl_interpretation/)
+* Interpretation of co-eQTL results based on GWAS annotation and different enrichment analyses (GO enrichment, TFBS enrichment using Remap database and GWAS enrichment using MAGMA) [05_coeqtl_interpretation/](05_coeqtl_interpretation/)
 
 ## Software requirements
 

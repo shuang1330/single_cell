@@ -5,10 +5,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - bioconductor-annotationhub
   - bioconductor-clusterprofiler
   - bioconductor-edger
   - bioconductor-enrichplot
+  - bioconductor-go.db
   - bioconductor-homo.sapiens
+  - bioconductor-rcy3
   - bioconductor-rgraphviz
   - bioconductor-rtracklayer 
   - bioconductor-sva
@@ -21,6 +24,7 @@ dependencies:
   - r-ggplot2
   - r-ggpubr
   - r-httr
+  - r-igraph
   - r-kableextra
   - r-knitr
   - r-magrittr
