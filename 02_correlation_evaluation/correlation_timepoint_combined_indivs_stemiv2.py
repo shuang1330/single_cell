@@ -1,7 +1,7 @@
-######################################################################
-# Calculate correlation for each cell type and timepoint (UT,3h,24h)
-# merging all individuals
-######################################################################
+##############################################################################
+# Calculate correlation for each cell type for the van Blokland v2 dataset,
+# timpeoint 6-8 weeks after admission, merging all individuals
+##############################################################################
 
 from scipy.stats import spearmanr
 import numpy as np

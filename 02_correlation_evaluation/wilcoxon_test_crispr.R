@@ -1,14 +1,8 @@
-##################################################################################
-# Benchmark our correlation results with the perturbation data set of Monique
-# * focus on UT cells and compare with CD4T cells (closest cell type)
-# * new version: Wilcoxon Test
-#
-# Overlap between single cell and bulk data not perfect 
-# (see script investigate_overlap_problem.R). Main reason is that chrMT and chrX
-# is included for the single cell data (but not in the bulk data).
-# Decision for now: take all genes for the single cell data set and do NOT remove
-# the ones that are not found in the bulk data set.
-#################################################################################
+# ------------------------------------------------------------------------------
+# Benchmark our correlation results from single cell (Oelen v3, CD4+ T cells)
+# and bulk (ImmuNexUT, naive CD4+ T cells)
+# with a public CRISPR perturbation dataset using Wilcoxon Rank Sum Test
+# ------------------------------------------------------------------------------
 
 library(data.table)
 library(ggplot2)
@@ -18,8 +12,6 @@ library(gtools)
 library(dplyr)
 
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
 
 #Get colors
 cols_brewer <- c(brewer.pal(n = 3, "Set2")[2],"grey78")
@@ -122,9 +114,7 @@ for(data_type in c("ImmuNexUT","sc")){
     }
     
     print(gene)
-    # print(paste("Measured genes:",length(all_measured_ko_genes)))
-    # print(paste("Number associated genes:",length(ko_genes_combined)))
-    # 
+    
     genes_found_in_both<-intersect(all_measured_ko_genes,expressed_genes)
     print(paste("Number genes measured in both:",length(genes_found_in_both)))
     
@@ -166,8 +156,6 @@ all_comps$is_ko<-factor(all_comps$is_ko,levels=c("DE genes","Non DE\ngenes"))
 
 p_vals$data_type<-ifelse(p_vals$data_type=="sc","single cell",
                             "ImmuNexUT")
-# p_vals$text<-stars.pval(p_vals$pval)
-# p_vals$text[p_vals$text=="."]<-"+"
 
 p_vals$pvaltext<-paste0("p = ",format(round(p_vals$pval,3),nsmall=3))
 p_vals$pvaltext<-ifelse(p_vals$pvaltext=="p = 0.000","p < 0.001",p_vals$pvaltext)
@@ -180,7 +168,6 @@ max_corr<-all_comps%>%
 p_vals<-merge(p_vals,max_corr,by=c("ko_gene","data_type"))
 p_vals$max_UT<-p_vals$max_UT*1.1
 p_vals$is_ko<-1.5
-#p_vals$is_ko<-factor(p_vals$is_ko,levels=c("TRUE","FALSE"))
 
 g_sc<-ggplot()+
   geom_violin(data=all_comps[all_comps$data_type=="single cell",],
@@ -223,38 +210,3 @@ g<-ggarrange(g_sc,g_bulk,ncol=1,align="hv")
 ggsave(g,file="perturbation_dataset/plots/wilcoxon_all_combined.pdf",
        width=15,height=8)
                           
-# #Save merged plot
-# g_comp<-ggarrange(plotlist=plot_list,ncol=5,nrow=1)
-# 
-# if(data_type == "sc"){
-#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_allgenes_",
-#                             MTcorrection,".pdf"),
-#          width=15,height=4)
-#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_allgenes_",
-#                             MTcorrection,".png"),
-#                               width=15,height=4)
-# } else if (data_type == "ImmuNexUT"){
-#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_ImmuNexUT_allgenes_",
-#                             MTcorrection,".pdf"),
-#          width=15,height=4)
-#   ggsave(g_comp,file=paste0("perturbation_dataset/plots/wilcoxon_ImmuNexUT_allgenes_",
-#                             MTcorrection,".png"),
-#          width=15,height=4)
-# }
-
-# #Check how similar the knockout of different guide RNAs is
-# #gene<-"FOXP1"
-# gene<-"PHB2"
-# test_files<-files[startsWith(files,gene)]
-# res_1<-read.table(paste0(path,test_files[1]))
-# res_2<-read.table(paste0(path,test_files[2]))
-# res_1$gene<-rownames(res_1)
-# res_2$gene<-rownames(res_2)
-# res<-merge(res_1,res_2,by="gene")
-# g<-ggplot(res,aes(-log10(p_val.x),-log10(p_val.y)))+
-#   geom_point()+ggtitle(gene)
-# ggsave(g,file=paste0("perturbation_dataset/plots/compare_guideRNA_",gene,"_pval.png"))
-# 
-# g<-ggplot(res,aes(avg_logFC.x,avg_logFC.y))+
-#   geom_point()+ggtitle(paste0(gene," - corr=",round(cor(res$avg_logFC.x,res$avg_logFC.y),2)))
-# ggsave(g,file=paste0("perturbation_dataset/plots/compare_guideRNA_",gene,"_fc.png"))

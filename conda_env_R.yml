@@ -23,12 +23,15 @@ dependencies:
   - r-ggally
   - r-ggplot2
   - r-ggpubr
+  - r-gtools
   - r-httr
   - r-igraph
   - r-kableextra
   - r-knitr
   - r-magrittr
   - r-rcolorbrewer
+  - r-reshape2
+  - r-reticulate
   - r-rvest
   - r-scales
   - r-seurat

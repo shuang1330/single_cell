@@ -1,37 +1,38 @@
 # ------------------------------------------------------------------------------
-# Check Pearson correlation between data sets (for CD4 T cells)
+# Check Pearson correlation between data sets (for CD4+ T cells)
 # * for single cell vs single cell data set
 # * for single cell vs bulk data set
 # * for bulk vs bulk data set
+# Combine all results in one large heatmap
 #  -----------------------------------------------------------------------------
 
 library(data.table)
 library(reticulate) # to read the single cell data (numpy)
 library(ggplot2)
 library(viridis)
+library(ggpubr)
 
-use_python("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/tools/miniconda3/envs/r40/bin/python")
 np <- import("numpy")
-
 
 theme_set(theme_bw())
 
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing/")
-
 cell_type<-"CD4T"
 
+#Path to different single cell dataset
 datasets<-c(mio_v3="co-expression_indivs_combined/",
                  mio_v2="co-expression_indivs_combined/one_million_version2/",
                  stemi_v2="co-expression_indivs_combined/stemi/version2/",
                  stemi_v3="co-expression_indivs_combined/stemi/version3/",
                  pilot="co-expression_indivs_combined/ng_updated_version/")
 
+#File endings for different single cell datasets
 file_suffixes<-c(mio_v3="_UT_correlation.csv",
                 mio_v2="_UT_correlation.csv",
                 stemi_v2="_t8w_correlation.csv",
                 stemi_v3="_t8w_correlation.csv",
                 pilot="_correlation.csv")
 
+#Name on plots for different single cell datasets
 dataset_names<-c(mio_v3="Oelen (v3)",
                  mio_v2="Oelen (v2)",
                  stemi_v2="van Blokland (v2)",
@@ -125,18 +126,6 @@ corr_comp$c2<-factor(corr_comp$c2,levels=dataset_names)
 write.table(corr_comp,
             file="co-expression_indivs_combined/dataset_comp_summary/correlation_singlecell_datasets.tsv",
             sep="\t",row.names = FALSE,quote=FALSE)
-
-#Create heatmap
-g<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
-  geom_tile()+
-  geom_text(aes(label=paste0(round(corr,3),"\n(",genes_unique,")")),size=3)+
-  xlab("Single cell data set")+
-  ylab("Single cell ata set")+
-  #scale_fill_gradient2("Correlation",limits = c(-1,1),low="darkblue",mid="white",high="darkred")+
-  scale_fill_viridis("Correlation",limits=c(0,1))+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-ggsave(g,file=paste0("co-expression_indivs_combined/plots/corr_singlecell_datasets.pdf"),
-       width=6,height=5)
 
 ################################################################################
 # Compare single cell with bulk
@@ -232,18 +221,6 @@ write.table(corr_comp,
             file="co-expression_indivs_combined/dataset_comp_summary/correlation_singlevsbulk_datasets.tsv",
             sep="\t",row.names = FALSE,quote=FALSE)
 
-#Create heatmap
-g<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
-  geom_tile()+
-  geom_text(aes(label=paste0(round(corr,3),"\n(",genes_unique,")")),size=3)+
-  xlab("Bulk data set")+
-  ylab("Single cell data set")+
-  #scale_fill_gradient2("Correlation",limits = c(-1,1),low="darkblue",mid="white",high="darkred")+
-  scale_fill_viridis("Correlation",limits=c(0,1))+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-ggsave(g,file=paste0("co-expression_indivs_combined/plots/corr_singlevsbulk_datasets.pdf"),
-       width=6,height=5)
-
 ################################################################################
 # Compare bulk with bulk
 ################################################################################
@@ -308,40 +285,10 @@ write.table(corr_comp,
             file="co-expression_indivs_combined/dataset_comp_summary/correlation_bulk_datasets.tsv",
             sep="\t",row.names = FALSE,quote=FALSE)
 
-corr_comp$c1<-factor(corr_comp$c1,levels=bulk_datasets)
-corr_comp$c2<-factor(corr_comp$c2,levels=bulk_datasets)
 
-#Create heatmap
-g<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
-  geom_tile()+
-  geom_text(aes(label=paste0(round(corr,3),"\n(",genes_unique,")")),size=3)+
-  xlab("Bulk data set")+
-  ylab("Bulk data set")+
-  #scale_fill_gradient2("Correlation",limits = c(-1,1),low="darkblue",mid="white",high="darkred")+
-  scale_fill_viridis("Correlation",limits=c(0,1))+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-ggsave(g,file=paste0("co-expression_indivs_combined/plots/corr_bulk_datasets.pdf"),
-       width=4,height=3)
-
-
-###############################################################################
-# Try to combine them all in one large plot
-
-library(data.table)
-library(reticulate) # to read the single cell data (numpy)
-library(ggplot2)
-library(viridis)
-library(ggpubr)
-
-theme_set(theme_bw())
-
-dataset_names<-c(mio_v3="Oelen (v3)",
-                 mio_v2="Oelen (v2)",
-                 stemi_v2="van Blokland (v2)",
-                 stemi_v3="van Blokland (v3)",
-                 pilot="van der Wijst")
-
-bulk_datasets<-c("BLUEPRINT","BIOS","ImmuNexUT")
+################################################################################
+# Combine all results in one large plot
+################################################################################
   
 corr_comp<-fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlecell_datasets.tsv")
 corr_comp$c1<-factor(corr_comp$c1,levels=dataset_names)
@@ -356,31 +303,20 @@ g.1<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
                             "van Blokland\n(v3)","van der Wijst"))+
   scale_x_discrete(labels=c("Oelen\n(v3)","Oelen\n(v2)","van\nBlokland\n(v2)",
                             "van\nBlokland\n(v3)","van der\nWijst"))
-#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-#corr_comp<-fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlevsbulk_datasets.tsv")
-corr_comp<-rbind(fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlecell_bios_allcts.tsv"),
-                 fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlecell_immunexut_allcts.tsv"),
-                 fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlecell_blueprint_cd4t.tsv"))
-corr_comp<-corr_comp[corr_comp$cell_type == "CD4T"]
-#corr_comp$c1[corr_comp$c1=="Blueprint"]<-"BLUEPRINT"
-# corr_comp$c1<-factor(corr_comp$c1,levels=bulk_datasets)
-# corr_comp$c2<-factor(corr_comp$c2,levels=dataset_names)
+corr_comp<-fread("co-expression_indivs_combined/dataset_comp_summary/correlation_singlevsbulk_datasets.tsv")
+corr_comp$c1[corr_comp$c1=="Blueprint"]<-"BLUEPRINT"
 corr_comp$c2<-factor(corr_comp$c2,levels=bulk_datasets)
 corr_comp$c1<-factor(corr_comp$c1,levels=dataset_names)
 g.2<-ggplot(corr_comp,aes(x=c2,y=c1,fill=corr))+
   geom_tile()+
   geom_text(aes(label=paste0(round(corr,3),"\n(",genes_unique,")")),size=3,
                 color="white")+
-  # geom_text(aes(label=paste0(round(corr,3),"\n(",genes_unique,")"),
-  #               color=ifelse(corr<0.5,'white','black')),size=3)+
-  #scale_color_manual(values=c("black","white"))+
   xlab("Bulk data set")+
   ylab("Single cell data set")+
   scale_fill_viridis("Correlation",limits=c(0,1))+
   scale_y_discrete(labels=c("Oelen (v3)","Oelen (v2)","van Blokland\n(v2)",
                             "van Blokland\n(v3)","van der Wijst"))
-#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 corr_comp<-fread("co-expression_indivs_combined/dataset_comp_summary/correlation_bulk_datasets.tsv")
 corr_comp$c1[corr_comp$c1=="Blueprint"]<-"BLUEPRINT"
@@ -396,8 +332,6 @@ g.3<-ggplot(corr_comp,aes(x=c1,y=c2,fill=corr))+
   ylab("Bulk data set")+
   scale_fill_viridis("Correlation",limits=c(0,1))+
   coord_flip()
-  # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-  #       legend.position="none")
   
 
 g_empty<-ggplot()+theme_void()

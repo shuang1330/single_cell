@@ -1,6 +1,10 @@
-################################################################################
-# Create inset plots for figure 2 (a,b,d)
-################################################################################
+# ------------------------------------------------------------------------------
+# Create inset plots for Main Figure 2 (a,b,d), showing scatterplots of
+# gene pair-wise Spearman correlation values between two data sets for
+# a) Oelen v3 dataset vs van Blokland v2 dataset (both CD4+ T cells)
+# b) ImmuNexUT - van Blokland v2 (naive CD4+ T cells and CD4+ T cells)
+# c) Blueprint - ImmuNexUT (both naive CD4+ T cells)
+# ------------------------------------------------------------------------------
 
 library(data.table)
 library(reticulate) # to read the single cell data (numpy)
@@ -9,12 +13,9 @@ library(ggplot2)
 library(viridis)
 library(ggpubr)
 
-use_python("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/tools/miniconda3/envs/r40/bin/python")
 np <- import("numpy")
 
 theme_set(theme_bw())
-
-setwd("/groups/umcg-lld/tmp01/projects/1MCellRNAseq/GRN_reconstruction/ongoing")
 
 #Load single cell
 load_sc_corr_data<-function(path){
@@ -101,7 +102,7 @@ create_corr_plot<-function(corr_d1,corr_d2,
   
   
 ################################################################################
-# For 2a: Oelen v3 - STEMI v2
+# For 2a: Oelen v3 - van Blokland v2
 ################################################################################
 
 main_celltype<-"CD4T"
@@ -129,7 +130,7 @@ ggsave(g_leg,file="bios/plots/figure2_legend_inset.pdf",width=3,height=1)
 ggsave(g,file="bios/plots/figure2a_exampleplot.pdf",width=5,height=5)
 
 ################################################################################
-# For 2b: ImmuNexUT - STEMI v2
+# For 2b: ImmuNexUT - van Blokland v2
 ################################################################################
 
 corr_immu<-fread("imd_paper_rna_data/correlation/Naive_CD4_correlation.txt")
@@ -144,7 +145,7 @@ g<-create_corr_plot(corr_immu,corr_stemi,
 ggsave(g,file="bios/plots/figure2b_exampleplot.pdf",width=5,height=5)
 
 ################################################################################
-# For 2b: ImmuNexUT - STEMI v2
+# For 2c: Blueprint - ImmuNexUT
 ################################################################################
 
 #Load Blueprint data

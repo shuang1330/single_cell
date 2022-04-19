@@ -1,6 +1,6 @@
 ###########################################################################################
 # Calculate correlation for each cell type, selecting always one timepoint (UT)
-# merging all individuals
+# merging all individuals for Oelen v2 and v3 dataset
 ###########################################################################################
 
 #from scipy.stats import t, norm

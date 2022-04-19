@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
-# Compare if correlated pairs are enriched in STRING network
-# (Using the same strategy as for CRISPR perturbations with Wilcoxon test)
-# 
+# Compare if correlated pairs from single cell (Oelen v3, CD4+ T cells)
+# and bulk (ImmuNexUT, naive CD4+ T cells) are enriched in STRING database
+# (Using the same strategy as in CRISPR validation with 
+# Wilcoxon Rank Sum Test)
 # ------------------------------------------------------------------------------
 
 library(data.table)

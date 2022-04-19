@@ -1,5 +1,5 @@
 ######################################################################
-# Calculate correlation for each cell type and timepoint (UT,3h,24h)
+# Calculate correlation for each cell type for van der Wijst dataset,
 # merging all individuals
 ######################################################################
 
